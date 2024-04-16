@@ -10,7 +10,7 @@ depends=(
     'python'
     'python-numpy'
     'python-opencv'
-    'python-mediapipe'
+    'python-mediapipe-bin'
     'python-setuptools'
     'python-importlib-metadata')
 makedepends=('git')
