@@ -11,10 +11,8 @@ depends=(
     'python-numpy'
     'python-opencv'
     'python-mediapipe-bin'
-    'python-build'
-    'python-installer'
-    'python-wheel')
-makedepends=('git')
+    )
+makedepends=('git' 'python-build' 'python-installer' 'python-wheel' 'python-setuptools')
 provides=('matrix-webcam')
 conflicts=('matrix-webcam')
 source=("$pkgname"::"git+${url}")
