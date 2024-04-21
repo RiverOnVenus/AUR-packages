@@ -10,7 +10,10 @@ depends=(
     'python'
     'python-numpy'
     'python-opencv'
-    'python-mediapipe-bin')
+    'python-mediapipe-bin'
+    'python-build'
+    'python-installer'
+    'python-wheel')
 makedepends=('git')
 provides=('matrix-webcam')
 conflicts=('matrix-webcam')
