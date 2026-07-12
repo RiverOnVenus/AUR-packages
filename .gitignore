@@ -1,7 +1,10 @@
 */*.tar
 */*.gz
 */*.part
+*/*.log
+*/*.pkl
 */pkg
 */src
 */*.pkg.*
 .SRCINFO
+.agents/
