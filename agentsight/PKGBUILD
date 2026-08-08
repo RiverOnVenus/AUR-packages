@@ -1,6 +1,6 @@
 # Maintainer: RiverOnVenus <aur@zhui.dev>
 pkgname=agentsight
-pkgver=0.2.59
+pkgver=1.0.3
 pkgrel=1
 pkgdesc="eBPF-based observability for AI agent sessions, prompts, process trees, files, network activity, and token usage"
 arch=('x86_64')
@@ -13,8 +13,8 @@ source=(
     'system-libsqlite3.patch'
 )
 sha256sums=(
-    '5d9ef733f1a780d8f1a2cc7f8e8230b5191748a2710c1ab32ea99e3c44d22354'
-    'c62f44ced9b65fd1b73a1eb72d0239164082b568dcf23a69ece0a4e9e07fc250'
+    'dbdc3dbc24b28b9403ec407312a0767ddbf561332e718521cc32eb493f6ef2e4'
+    '7308e61af22199a20ab3d4caf8b2e35eadc1d836aa81eb2684c2735dd519340d'
 )
 
 prepare() {
