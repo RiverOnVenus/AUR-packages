@@ -1,22 +1,11 @@
 diff --git a/collector/Cargo.lock b/collector/Cargo.lock
 --- a/collector/Cargo.lock
 +++ b/collector/Cargo.lock
-@@ -1513,1 +1513,0 @@
+@@ -1575,1 +1575,0 @@
 - "cc",
 diff --git a/collector/Cargo.toml b/collector/Cargo.toml
 --- a/collector/Cargo.toml
 +++ b/collector/Cargo.toml
-@@ -40,1 +40,1 @@
--rusqlite = { version = "0.32", features = ["bundled"] }
-+rusqlite = { version = "0.32" }
-diff --git a/agentsight-capture/Cargo.lock b/agentsight-capture/Cargo.lock
---- a/agentsight-capture/Cargo.lock
-+++ b/agentsight-capture/Cargo.lock
-@@ -723,1 +723,0 @@
-- "cc",
-diff --git a/agentsight-capture/Cargo.toml b/agentsight-capture/Cargo.toml
---- a/agentsight-capture/Cargo.toml
-+++ b/agentsight-capture/Cargo.toml
-@@ -50,1 +50,1 @@
+@@ -48,1 +48,1 @@
 -rusqlite = { version = "0.32", features = ["bundled"] }
 +rusqlite = { version = "0.32" }
