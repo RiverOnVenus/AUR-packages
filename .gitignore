@@ -8,3 +8,6 @@
 */*.pkg.*
 .SRCINFO
 .agents/
+.claude/
+AGENTS.md
+CLAUDE.md
