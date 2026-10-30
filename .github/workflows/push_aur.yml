@@ -93,6 +93,10 @@ jobs:
 
       - name: Check PKGBUILD
         id: build-test
+        env:
+          # Standard GitHub runners have 4 vCPUs and makepkg defaults to
+          # serial builds; this also applies to dependencies built by paru.
+          MAKEFLAGS: "-j4"
         # Pinned to master as of 2026-10; bump deliberately.
         uses: ouuan/pkgbuild-action@7ccfe89be1c82ac90fe444ab70c1a3b9397f5894
         with:
