@@ -4,7 +4,7 @@
 
 pkgname=motrix-bin
 pkgver=1.8.19
-pkgrel=2
+pkgrel=3
 
 pkgdesc="A full-featured download manager (binary version)"
 arch=('x86_64')
@@ -12,11 +12,13 @@ url="https://github.com/agalwood/Motrix"
 license=('MIT')
 
 conflicts=('motrix' 'motrix-git')
-depends=('gtk3' 'libxcb' 'nss')
+depends=('alsa-lib' 'gtk3' 'libxcb' 'nss')
 changelog="changelog.md"
 
-source=("https://github.com/agalwood/Motrix/releases/download/v${pkgver}/Motrix_${pkgver}_amd64.deb")
-sha512sums=('8a3dab9c731268c2291f286d8efa7815046bbe00046deb938db061863d3ad3e14ddcb50ba4a7e44ada2c11d196d660bb6a762af4e6e589ddb38692266010e61a')
+source=("https://github.com/agalwood/Motrix/releases/download/v${pkgver}/Motrix_${pkgver}_amd64.deb"
+        "LICENSE::https://raw.githubusercontent.com/agalwood/Motrix/v${pkgver}/LICENSE")
+sha512sums=('8a3dab9c731268c2291f286d8efa7815046bbe00046deb938db061863d3ad3e14ddcb50ba4a7e44ada2c11d196d660bb6a762af4e6e589ddb38692266010e61a'
+            '568280070856bdc3d2998fbf3a28c3f4e32ee091144aebbc87df89dcf5e71398a56bfc88c0cc34e291fcfd89a740aa95c74d5db533a528f6ce86c930545ee9cc')
 
 package() {
 	tar -xf "$srcdir/data.tar.xz" -C "$pkgdir/"
@@ -27,4 +29,6 @@ package() {
 
 	# SUID chrome-sandbox for electron 5+ as indicated here: https://github.com/electron/electron/issues/17972#issuecomment-487369441
 	chmod 4755 "$pkgdir/opt/Motrix/chrome-sandbox"
+
+	install -Dm644 "$srcdir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
