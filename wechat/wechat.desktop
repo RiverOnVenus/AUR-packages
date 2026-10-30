@@ -1,0 +1,29 @@
+[Desktop Entry]
+Comment=WeChat
+Comment[zh_CN]=微信
+Exec=env _portableConfig=com.tencent.wechat PORTABLE_CONF=com.tencent.wechat /usr/bin/portable -- %u
+Icon=wechat
+Name=WeChat
+Name[zh_CN]=微信
+Categories=Utility;Network;InstantMessaging;Chat;
+Terminal=false
+Type=Application
+Keywords=wechat;weixin;we;w;
+Keywords[zh_CN]=微;微信;wechat;weixin;we;w;
+X-GNOME-SingleWindow=true
+SingleMainWindow=true
+Actions=opendir;quit;
+StartupWMClass=wechat
+StartupNotify=false
+
+[Desktop Action opendir]
+Name=Open WeChat Home
+Name[zh_CN]=打开数据目录
+Exec=env _portableConfig=com.tencent.wechat PORTABLE_CONF=com.tencent.wechat /usr/bin/portable --actions opendir
+Icon=go-home-symbolic
+
+[Desktop Action quit]
+Name=Quit WeChat
+Name[zh_CN]=退出微信
+Exec=env _portableConfig=com.tencent.wechat PORTABLE_CONF=com.tencent.wechat /usr/bin/portable --actions quit
+Icon=system-log-out-symbolic

@@ -1,0 +1,60 @@
+# This is a Portable configuration, using TOML 1.1.0
+# For syntax, check https://toml.io/en/v1.1.0
+
+# The metadata section contains information of your sandbox.
+[metadata]
+# This is your Application ID, avoid conflict. Should be a reversed DNS name.
+# If the author's DNS domain name contains hyphen/minus characters ('-'), which are not allowed in D-Bus interface names, they should be replaced by underscores. If the DNS domain name contains a digit immediately following a period ('.'), which is also not allowed in interface names), the interface name should add an underscore before that digit. For example, if the owner of 7-zip.org defined an interface for out-of-process plugins, it might be named org._7_zip.Plugin.
+appID = "com.tencent.wechat"
+
+# This is a friendly name of an application. It should only contain ASCII characters and not spaces.
+friendlyName = "WeChat"
+
+# This is the state directory of your application, relative to "XDG_DATA_HOME".
+stateDirectory = "WeChat_Data"
+
+# The exec section defines how the underlying process is started.
+[exec]
+# target defines the program to start.
+target = "/opt/wechat/wechat"
+
+# arguments holds an array of arguments passed to the application, this is also used when starting secondary instances.
+arguments = []
+
+# The processes section defines how Portable tracks tasks.
+[processes]
+# Watch for spawned commands. When all of them exits, automatically terminate the sandbox. Defaults to true.
+track = true
+
+# The system section controls general permission.
+[system]
+# Whether or not an application can call Inhibit Portal to prevent automatic suspend. Defaults to false.
+inhibitSuspend = false
+
+deviceAllow = ["camera"]
+
+# The network section defines behaviour of Portable's network firewall. Requires netsock for filtering.
+[network]
+# Whether or not an application can use network interfaces. Defaults to true.
+enable = true
+
+# The privacy section defines several device exposure preference. By default, Portable does not allow apps to see physical devices. This includes discrete GPUs when gameMode is off, input devices, cameras, and all other PCI devices.
+[privacy]
+# When false, prevents application from connecting to X server on Wayland. Defaults to true.
+x11 = true
+
+# When false, prevents application from connecting to legacy notifications endpoint. Defaults to true.
+classicNotifications = true
+
+[privacy.lockdown_options]
+seccomp_whitelist = true
+landlock = true
+
+# Do not use. May break apps.
+[advanced]
+zink = false
+qt5Compat = true
+mprisName = []
+trayWake = true
+kDEStatus = false
+flatpakInfo = true
