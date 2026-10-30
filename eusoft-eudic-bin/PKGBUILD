@@ -2,7 +2,7 @@
 _pkgname=eudic
 pkgname="eusoft-${_pkgname}-bin"
 pkgver=26.9.1
-pkgrel=2
+pkgrel=3
 pkgdesc="Authoritative English dictionary software, an essential tool for English learners.权威的英语词典软件,英语学习者必备的工具."
 arch=('x86_64')
 url="https://www.eudic.net/v4/en/app/eudic"
@@ -55,6 +55,10 @@ prepare() {
         s/Icon=com.eusoft.${_pkgname}/Icon=${pkgname%-bin}/g
     " "${srcdir}/squashfs-root/default.desktop"
     ln -sf "/usr/lib/qt/plugins/platforminputcontexts/libfcitx"*.so "${srcdir}/squashfs-root/plugins/platforminputcontexts/"
+    # The ln above leaves a literal libfcitx*.so link when fcitx5-qt is not
+    # installed on the build host. Drop any dangling link so the package
+    # never ships one.
+    find "${srcdir}/squashfs-root/plugins/platforminputcontexts" -xtype l -delete
 }
 package() {
     install -Dm755 "${srcdir}/${pkgname%-bin}.sh" "${pkgdir}/usr/bin/${pkgname%-bin}"
