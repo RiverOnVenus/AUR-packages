@@ -42,4 +42,17 @@ jobs:
 
           echo "dispatching ${#devel[@]} packages:"
           printf '  %s\n' "${devel[@]}"
-          gh workflow run push_aur.yml -f packages="${devel[*]}"
+
+          # The Actions API intermittently returns 500; retry instead of
+          # failing the nightly refresh.
+          for attempt in 1 2 3 4 5; do
+            if gh workflow run push_aur.yml -f packages="${devel[*]}"; then
+              echo "dispatch accepted on attempt $attempt"
+              exit 0
+            fi
+            echo "dispatch attempt $attempt failed"
+            sleep $((attempt * 15))
+          done
+
+          echo "could not dispatch after 5 attempts" >&2
+          exit 1
