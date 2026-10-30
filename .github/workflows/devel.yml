@@ -1,0 +1,45 @@
+name: "Refresh devel packages"
+
+# Rebuilds VCS packages so their pkgver() picks up new upstream commits.
+# The main workflow only builds directories touched by a push, which would
+# otherwise leave these packages frozen at their last build.
+on:
+  schedule:
+    # Daily at 04:00 UTC.
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dispatch builds for pkgver() packages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # -bin packages with pkgver() parse the version out of a downloaded
+          # artifact; rebuilding them daily only re-downloads it.
+          mapfile -t devel < <(
+            for pkgbuild in */PKGBUILD; do
+              dir=${pkgbuild%/PKGBUILD}
+              [ -f "$pkgbuild" ] || continue
+              grep -q 'pkgver()' "$pkgbuild" || continue
+              case "$dir" in *-bin) continue ;; esac
+              echo "$dir"
+            done | sort
+          )
+
+          if [ ${#devel[@]} -eq 0 ]; then
+            echo "no devel packages found"
+            exit 0
+          fi
+
+          echo "dispatching ${#devel[@]} packages:"
+          printf '  %s\n' "${devel[@]}"
+          gh workflow run push_aur.yml -f packages="${devel[*]}"
