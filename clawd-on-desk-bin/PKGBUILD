@@ -1,0 +1,93 @@
+# Maintainer: RiverOnVenus <aur@zhui.dev>
+
+pkgname=clawd-on-desk-bin
+_pkgname='Clawd on Desk'
+pkgver=1.4.0
+_electronversion=41
+pkgrel=1
+pkgdesc="A desktop pet that reacts to your Claude Code sessions in real-time (prebuilt version, uses system electron)"
+arch=('x86_64')
+url="https://github.com/rullerzhou-afk/clawd-on-desk"
+license=('AGPL-3.0-only')
+conflicts=("${pkgname%-bin}")
+provides=("${pkgname%-bin}=${pkgver}")
+depends=(
+    "electron${_electronversion}"
+    'hicolor-icon-theme'
+    'python'
+    'nodejs'
+)
+options=('!emptydirs' '!strip')
+source=(
+    "${pkgname%-bin}-${pkgver}.deb::${url}/releases/download/v${pkgver}/${_pkgname// /-}-${pkgver}-amd64.deb"
+    "${pkgname%-bin}.sh"
+)
+sha256sums=('5cb3d2275a4112efb872a8fb9a02dd52ab19f757f194c1f6430f7c0def76787e'
+            '0ccca52406850f39ca4a425404ae5534ddc6627d0772fbf92285f16910c89529')
+
+prepare() {
+    # Unpack the deb data archive
+    bsdtar -xf "${srcdir}/data."*
+
+    # Substitute template values in the launcher script
+    # The launcher lives at /usr/lib/clawd-on-desk/clawd-on-desk
+    # Resources live at /usr/lib/clawd-on-desk/resources/ (matches upstream layout)
+    sed -i \
+        -e "s/@electronversion@/${_electronversion}/g" \
+        -e "s/@appname@/${pkgname%-bin}/g" \
+        -e "s|@runname@|resources/app.asar|g" \
+        "${srcdir}/${pkgname%-bin}.sh"
+
+    # Patch desktop file: replace bundled binary path with our launcher
+    # Wayland is handled automatically by the app (XWayland relaunch since v0.10.0)
+    sed -i \
+        -e "s|/opt/${_pkgname}/clawd-on-desk|/usr/bin/${pkgname%-bin}|" \
+        "${srcdir}/usr/share/applications/${pkgname%-bin}.desktop"
+
+    # Strip non-linux-x64 koffi native binaries
+    cd "${srcdir}/opt/${_pkgname}/resources/app.asar.unpacked/node_modules/koffi/build/koffi"
+    for _dir in */; do
+        case "${_dir%/}" in
+            linux_x64) ;;
+            *) rm -rf "${_dir%/}" ;;
+        esac
+    done
+}
+
+package() {
+    # /usr/lib/clawd-on-desk/ — install dir mirroring upstream layout
+    install -dm755 "${pkgdir}/usr/lib/${pkgname%-bin}"
+
+    # Launcher → /usr/lib/clawd-on-desk/clawd-on-desk
+    # auto-start.js resolves ../../../ from hooks/ to find the executable here
+    install -Dm755 "${srcdir}/${pkgname%-bin}.sh" \
+        "${pkgdir}/usr/lib/${pkgname%-bin}/${pkgname%-bin}"
+
+    # Symlink /usr/bin/clawd-on-desk → ../lib/clawd-on-desk/clawd-on-desk
+    install -dm755 "${pkgdir}/usr/bin"
+    ln -s "../lib/${pkgname%-bin}/${pkgname%-bin}" \
+        "${pkgdir}/usr/bin/${pkgname%-bin}"
+
+    # App resources → /usr/lib/clawd-on-desk/resources/
+    _resources_dir=$(find "${srcdir}" -type f -name "app.asar" -exec dirname {} \; | head -n 1)
+    cp -a --no-preserve=ownership "${_resources_dir}" \
+        "${pkgdir}/usr/lib/${pkgname%-bin}/resources"
+
+    # Icons → /usr/share/icons/
+    find "${srcdir}" -type f \( -name "*.png" -o -name "*.svg" \) \
+        -path "*share/icons/*" | while read -r _i; do
+        _extension="${_i##*.}"
+        _icon_path="${_i#*share/icons/}"
+        _target_dir="/usr/share/icons/$(dirname "${_icon_path}")"
+        install -Dm644 "${_i}" "${pkgdir}${_target_dir}/${pkgname%-bin}.${_extension}"
+    done
+
+    # Desktop file → /usr/share/applications/
+    install -Dm644 "${srcdir}/usr/share/applications/${pkgname%-bin}.desktop" \
+        -t "${pkgdir}/usr/share/applications"
+
+    # License
+    _license_file="${srcdir}/opt/${_pkgname}/LICENSE.electron.txt"
+    install -Dm644 "${_license_file}" \
+        "${pkgdir}/usr/share/licenses/${pkgname%-bin}/LICENSE.electron.txt"
+}
