@@ -1,5 +1,11 @@
 */*.tar
+*/*.tar.*
 */*.gz
+*/*.zip
+*/*.7z
+*/*.AppImage
+*/*.deb
+*/*.rpm
 */*.part
 */*.log
 */*.pkl
