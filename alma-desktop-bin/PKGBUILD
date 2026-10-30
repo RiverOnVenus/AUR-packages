@@ -1,0 +1,63 @@
+# Maintainer: RiverOnVenus <aur@zhui.dev>
+
+pkgname=alma-desktop-bin
+pkgver=0.4.250
+pkgrel=1
+pkgdesc='AI provider orchestration desktop app'
+arch=('x86_64')
+url='https://alma.now'
+license=('LicenseRef-custom')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'bash'
+  'cairo'
+  'dbus'
+  'expat'
+  'gcc-libs'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libgomp'
+  'libnotify'
+  'libsecret'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'xdg-utils'
+)
+optdepends=(
+  'java-runtime: run Java-based MCP servers'
+  'nodejs: run Node.js-based MCP servers'
+  'python: run Python-based MCP servers'
+)
+provides=('alma-desktop')
+conflicts=('alma-appimage')
+source=("https://github.com/yetone/alma-releases/releases/download/v${pkgver}/alma-${pkgver}-linux-amd64.deb")
+sha256sums=('dd4c7f78f94190d22c0a9f7842e4a65d7efdc331e7bc0ef32167ad3bce3926a4')
+
+prepare() {
+  bsdtar -xf "${srcdir}/alma-${pkgver}-linux-amd64.deb" -C "${srcdir}" data.tar.xz
+  mkdir -p "${srcdir}/payload"
+  bsdtar -xf "${srcdir}/data.tar.xz" -C "${srcdir}/payload"
+}
+
+package() {
+  cp -a --no-preserve=ownership "${srcdir}"/payload/usr "${srcdir}"/payload/opt "${pkgdir}"/
+
+  # The Debian postinst creates this alternative; skip it and the CLI entry point is missing.
+  install -d "${pkgdir}/usr/bin"
+  ln -s /opt/Alma/alma "${pkgdir}/usr/bin/alma"
+}
