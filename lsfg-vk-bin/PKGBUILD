@@ -19,7 +19,9 @@ provides=("${pkgname%-bin}=$pkgver")
 conflicts=("${pkgname%-bin}")
 source=("https://builds.lsfg-vk.dev/lsfg-vk-${pkgver}.tar.xz"
         "LICENSE")
-sha256sums=('d8378b45d378150ea9aba803a0ba855d8ce91ad9b3366ee0eb2036b06b08380c'
+# Upstream rebuilt the 2.0.0 artifact after the AUR package was updated; the
+# artifact served on 2026-10-30 hashes to 08bdbdf3..., not d8378b45....
+sha256sums=('08bdbdf373a111022df87dac7aa87e3b564bb841f961552e3ca85fea12b5aa74'
             '38762e3777f4ec00a6f769062a7c3f704fb78ce08303ecff88558da4c49cf9ea')
 install=lsfg-vk.install
 noextract=("lsfg-vk-${pkgver}.tar.xz")
