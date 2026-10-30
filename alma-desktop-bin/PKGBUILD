@@ -2,7 +2,7 @@
 
 pkgname=alma-desktop-bin
 pkgver=0.4.250
-pkgrel=1
+pkgrel=2
 pkgdesc='AI provider orchestration desktop app'
 arch=('x86_64')
 url='https://alma.now'
@@ -36,6 +36,7 @@ depends=(
   'nss'
   'pango'
   'systemd-libs'
+  'vulkan-icd-loader'
   'xdg-utils'
 )
 optdepends=(
@@ -60,4 +61,9 @@ package() {
   # The Debian postinst creates this alternative; skip it and the CLI entry point is missing.
   install -d "${pkgdir}/usr/bin"
   ln -s /opt/Alma/alma "${pkgdir}/usr/bin/alma"
+
+  install -Dm644 "${srcdir}/payload/opt/Alma/LICENSE.electron.txt" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.electron.txt"
+  install -Dm644 "${srcdir}/payload/opt/Alma/LICENSES.chromium.html" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.chromium.html"
 }
