@@ -3,8 +3,7 @@
 
 pkgname=wechat-bin
 pkgver=4.1.13.26
-pkgrel=1
-epoch=
+pkgrel=2
 pkgdesc="微信是一种生活方式. This is a repackage of WeChat."
 arch=('x86_64' 'aarch64' 'loong64')
 url="https://weixin.qq.com/"
@@ -42,6 +41,8 @@ depends=(
 	"libxfixes"
 	"cairo"
 	"libx11"
+	"libice"
+	"libsm"
 	"expat"
 	"libvlc"
 	"libxdamage"
