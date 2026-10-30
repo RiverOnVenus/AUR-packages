@@ -1,0 +1,29 @@
+# Packages listed here are pushed to the AUR.
+# Everything else is built into the personal repository only.
+# One pkgname per line, matching the directory name. Comments and blank lines are ignored.
+
+agentsight
+colout-git
+cppman-git
+delance-langserver
+dnslookup-git
+flamelens-git
+honk-core-bin
+imgcatr-git
+jitterdebugger-git
+jj-git
+kawaii-gcc-git
+kawaii-gcc-zh-cn-git
+kernel-hardening-checker-git
+matrix-webcam-git
+neco-git
+pacvis-git
+pkg.sh-git
+plasma6-applets-kurve-git
+plasma6-wallpapers-smart-video-wallpaper-reborn-git
+python-dbgpu
+qwenimage-ncnn-vulkan-bin
+terminaltexteffects-git
+uu-remote-linux
+whichllm
+whichllm-git
