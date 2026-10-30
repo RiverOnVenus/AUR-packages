@@ -2,7 +2,7 @@
 
 pkgname=jetbrains-toolbox
 pkgver=3.9.0.88839
-pkgrel=1
+pkgrel=2
 pkgdesc='Manage all your JetBrains Projects and Tools'
 arch=('x86_64' 'i686')
 url='https://www.jetbrains.com/toolbox/'
@@ -11,12 +11,14 @@ depends=(
   glib2
   libxslt
   libxss
+  libxi
+  libxrender
+  libxtst
   nss
   org.freedesktop.secrets
   xcb-util-keysyms
   xdg-utils
 )
-optdepends=('xdg-utils: open URLs')
 options=('!strip' '!debug')
 source=("https://download.jetbrains.com/toolbox/${pkgname}-${pkgver}.tar.gz"
         jetbrains-toolbox.desktop
