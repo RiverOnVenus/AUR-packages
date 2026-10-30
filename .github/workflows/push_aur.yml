@@ -5,22 +5,61 @@ on:
   #schedule:
   #- cron: "0 0 * * *"
   workflow_dispatch:
+    inputs:
+      packages:
+        description: "Space-separated package directories to rebuild (empty = all)"
+        required: false
+        default: ""
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   generate-matrix:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Generate matrix
         id: gen-matrix
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          REQUESTED: ${{ github.event.inputs.packages }}
         run: |
-          mapfile -t aur < <(sed -e 's/#.*//' -e 's/[[:space:]]*$//' aur-packages.txt | grep -v '^$')
+          parse_aur() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
+          mapfile -t aur < <(parse_aur < aur-packages.txt)
+
+          candidates=()
+          if [ "$EVENT" = "workflow_dispatch" ] && [ -n "$REQUESTED" ]; then
+            read -r -a candidates <<< "$REQUESTED"
+          elif [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            mapfile -t changed < <(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+            mapfile -t dirs < <(printf '%s\n' "${changed[@]}" | cut -d/ -f1 | sort -u)
+            # A push that only edits the whitelist must still build the packages
+            # it added, otherwise they never reach the AUR.
+            added=()
+            if printf '%s\n' "${changed[@]}" | grep -qx 'aur-packages.txt'; then
+              mapfile -t old_aur < <(git show "$BEFORE:aur-packages.txt" 2>/dev/null | parse_aur || true)
+              mapfile -t added < <(comm -13 <(printf '%s\n' "${old_aur[@]}" | sort -u) <(printf '%s\n' "${aur[@]}" | sort -u))
+            fi
+            mapfile -t candidates < <(
+              {
+                printf '%s\n' "${dirs[@]}"
+                printf '%s\n' "${added[@]}"
+              } | grep -v '^$' | sort -u
+            )
+          else
+            mapfile -t candidates < <(find . -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | sort)
+          fi
+
           include=()
-          for d in */; do
-            p=${d%/}
+          for p in "${candidates[@]}"; do
             [ -f "$p/PKGBUILD" ] || continue
             if printf '%s\n' "${aur[@]}" | grep -qxF "$p"; then
               include+=("{\"name\":\"$p\",\"aur\":true}")
@@ -28,13 +67,21 @@ jobs:
               include+=("{\"name\":\"$p\",\"aur\":false}")
             fi
           done
-          echo "matrix=$(printf '%s\n' "${include[@]}" | jq -cs '{include: .}')" >> "$GITHUB_OUTPUT"
+
+          echo "count=${#include[@]}" >> "$GITHUB_OUTPUT"
+          if [ ${#include[@]} -gt 0 ]; then
+            echo "matrix=$(printf '%s\n' "${include[@]}" | jq -cs '{include: .}')" >> "$GITHUB_OUTPUT"
+          else
+            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
+          fi
     outputs:
       matrix: ${{ steps.gen-matrix.outputs.matrix }}
+      count: ${{ steps.gen-matrix.outputs.count }}
 
   build:
     runs-on: ubuntu-latest
     needs: generate-matrix
+    if: needs.generate-matrix.outputs.count != '0'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
@@ -46,7 +93,8 @@ jobs:
 
       - name: Check PKGBUILD
         id: build-test
-        uses: ouuan/pkgbuild-action@master
+        # Pinned to master as of 2026-10; bump deliberately.
+        uses: ouuan/pkgbuild-action@7ccfe89be1c82ac90fe444ab70c1a3b9397f5894
         with:
           path: ${{ matrix.name }}
 
@@ -68,7 +116,8 @@ jobs:
 
       - name: Install SSH key
         if: matrix.aur
-        uses: shimataro/ssh-key-action@v2
+        # Pinned to v2 as of 2026-10; bump deliberately.
+        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3
         with:
           key: ${{ secrets.SSH_KEY }}
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
@@ -100,49 +149,129 @@ jobs:
 
   publish-repo:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [generate-matrix, build]
+    # Run even when some or all builds failed, and when nothing was built at
+    # all, so deletions and whitelist changes are still reconciled.
+    if: always() && !cancelled() && needs.generate-matrix.result == 'success'
     container: archlinux:base-devel
+    permissions:
+      contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           pattern: pkg-*
           merge-multiple: true
-          path: repo
+          path: new
 
       - name: Install tools
         run: pacman -Syu --noconfirm --needed github-cli jq
 
-      - name: Build repository database
-        working-directory: repo
-        run: |
-          shopt -s nullglob
-          packages=(*.pkg.tar.zst)
-          if [ ${#packages[@]} -eq 0 ]; then
-            echo "no packages were built" >&2
-            exit 1
-          fi
-          repo-add zhui-arch.db.tar.gz "${packages[@]}"
-
-      - name: Publish release
-        working-directory: repo
+      - name: Fetch database
+        id: fetch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release view zhui-arch >/dev/null 2>&1 || \
+          mkdir -p new
+          shopt -s nullglob
+          packages=(new/*.pkg.tar.zst)
+          if gh release view zhui-arch >/dev/null 2>&1; then
+            echo "exists=1" >> "$GITHUB_OUTPUT"
+            gh release download zhui-arch -p 'zhui-arch.db' -p 'zhui-arch.files' -D . --clobber >/dev/null 2>&1 || true
+            [ -f zhui-arch.db ] && mv -f zhui-arch.db zhui-arch.db.tar.gz
+            [ -f zhui-arch.files ] && mv -f zhui-arch.files zhui-arch.files.tar.gz
+          else
+            echo "exists=0" >> "$GITHUB_OUTPUT"
+          fi
+          echo "packages=${#packages[@]}" >> "$GITHUB_OUTPUT"
+
+      # No token in this step: it sources every PKGBUILD.
+      - name: Reconcile database
+        id: reconcile
+        run: |
+          set -o pipefail
+          shopt -s nullglob
+          packages=(new/*.pkg.tar.zst)
+          changed=0
+
+          # Drop entries for packages that no longer exist in the repository.
+          if [ -f zhui-arch.db.tar.gz ]; then
+            declare -A current=()
+            parsed=1
+            while IFS= read -r -d '' pkgbuild; do
+              names="$(bash -c 'source "$1" >/dev/null 2>&1; printf "%s\n" "${pkgname[@]}"' _ "$pkgbuild")"
+              if [ -z "$names" ]; then
+                echo "warning: could not read pkgname from $pkgbuild, skipping stale entry cleanup"
+                parsed=0
+                break
+              fi
+              while IFS= read -r name; do
+                [ -n "$name" ] && current["$name"]=1
+              done <<< "$names"
+            done < <(find . -mindepth 2 -maxdepth 2 -name PKGBUILD -print0)
+
+            if [ "$parsed" -eq 1 ]; then
+              while IFS= read -r name; do
+                [ -n "$name" ] || continue
+                if [ -z "${current[$name]:-}" ]; then
+                  echo "removing stale entry: $name"
+                  repo-remove zhui-arch.db.tar.gz "$name" || true
+                  changed=1
+                fi
+              done < <(bsdtar -xOf zhui-arch.db.tar.gz --include='*/desc' | awk '/^%NAME%$/{getline; print}')
+            fi
+          fi
+
+          if [ ${#packages[@]} -gt 0 ]; then
+            repo-add zhui-arch.db.tar.gz "${packages[@]}"
+            changed=1
+          fi
+
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        if: steps.reconcile.outputs.changed == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -o pipefail
+          shopt -s nullglob
+          packages=(new/*.pkg.tar.zst)
+
+          if [ "${{ steps.fetch.outputs.exists }}" -eq 0 ]; then
             gh release create zhui-arch \
               --title "zhui-arch package repository" \
               --notes "Personal pacman repository.
 
           Server: ${{ github.server_url }}/${{ github.repository }}/releases/download/zhui-arch"
+          fi
 
           # Upload packages first, the database last, so clients never see a
           # database entry whose package is not downloadable yet.
-          gh release upload zhui-arch --clobber ./*.pkg.tar.zst
+          if [ ${#packages[@]} -gt 0 ]; then
+            gh release upload zhui-arch --clobber "${packages[@]}"
+          fi
           gh release upload zhui-arch --clobber ./zhui-arch.db ./zhui-arch.files
 
-          # Drop assets that are not part of the current repository contents.
-          ls -1 | sort > /tmp/keep
+          # Drop assets no longer referenced by the database.
+          if ! bsdtar -xOf zhui-arch.db.tar.gz --include='*/desc' |
+            awk '/^%FILENAME%$/{getline; print}' | sort > /tmp/keep; then
+            echo "refusing to prune: could not read the database" >&2
+            exit 1
+          fi
+          if [ ! -s /tmp/keep ]; then
+            echo "refusing to prune: database has no entries" >&2
+            exit 1
+          fi
+          printf 'zhui-arch.db\nzhui-arch.files\n' >> /tmp/keep
+          sort -o /tmp/keep /tmp/keep
           gh release view zhui-arch --json assets --jq '.assets[].name' | while read -r asset; do
-            grep -qxF "$asset" /tmp/keep || gh release delete-asset zhui-arch "$asset" --yes
+            if ! grep -qxF "$asset" /tmp/keep; then
+              echo "deleting stale asset: $asset"
+              gh release delete-asset zhui-arch "$asset" --yes
+            fi
           done
