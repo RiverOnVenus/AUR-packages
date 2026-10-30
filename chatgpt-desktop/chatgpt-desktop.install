@@ -1,0 +1,92 @@
+_chatgpt_apparmor_profile='/etc/apparmor.d/chatgpt'
+_chatgpt_apparmor_profile_name='chatgpt'
+_chatgpt_apparmor_abi='/etc/apparmor.d/abi/4.0'
+_chatgpt_apparmor_disable='/etc/apparmor.d/disable/chatgpt'
+_chatgpt_apparmor_profiles='/sys/kernel/security/apparmor/profiles'
+
+note() {
+  local blue=$'\033[1;34m' yellow=$'\033[1;33m'
+  local bold=$'\033[0;1m' all_off=$'\033[0m'
+
+  printf '%s==>%s NOTE:%s %s%s\n' "${blue}" "${yellow}" "${bold}" "$1" "${all_off}"
+}
+
+_chatgpt_apparmor_enabled() {
+  command -v aa-enabled >/dev/null 2>&1 &&
+    command -v apparmor_parser >/dev/null 2>&1 &&
+    aa-enabled --quiet
+}
+
+_chatgpt_apparmor_profile_disabled() {
+  [ -e "${_chatgpt_apparmor_disable}" ] ||
+    [ -L "${_chatgpt_apparmor_disable}" ]
+}
+
+_chatgpt_load_apparmor_profile() {
+  if ! _chatgpt_apparmor_enabled; then
+    return 0
+  fi
+
+  if [ ! -f "${_chatgpt_apparmor_profile}" ]; then
+    printf '%s\n' \
+      "warning: chatgpt-desktop: AppArmor profile is missing: ${_chatgpt_apparmor_profile}" >&2
+    return 0
+  fi
+
+  if [ ! -f "${_chatgpt_apparmor_abi}" ]; then
+    printf '%s\n' \
+      "warning: chatgpt-desktop: AppArmor ABI 4.0 is unavailable; profile was not loaded" >&2
+    return 0
+  fi
+
+  if _chatgpt_apparmor_profile_disabled; then
+    printf '%s\n' \
+      "chatgpt-desktop: AppArmor profile is disabled; not loading ${_chatgpt_apparmor_profile}"
+    return 0
+  fi
+
+  if [ -e "${_chatgpt_apparmor_profile}.pacnew" ]; then
+    printf '%s\n' \
+      "warning: chatgpt-desktop: ${_chatgpt_apparmor_profile}.pacnew was not loaded; review and merge it into the active profile" >&2
+  fi
+
+  if ! apparmor_parser -r -W -T "${_chatgpt_apparmor_profile}"; then
+    printf '%s\n' \
+      "warning: chatgpt-desktop: failed to load AppArmor profile: ${_chatgpt_apparmor_profile}" >&2
+  fi
+}
+
+_chatgpt_remove_apparmor_profile() {
+  if ! _chatgpt_apparmor_enabled; then
+    return 0
+  fi
+
+  if [ ! -f "${_chatgpt_apparmor_profile}" ] ||
+    [ ! -f "${_chatgpt_apparmor_abi}" ]; then
+    return 0
+  fi
+
+  if [ -r "${_chatgpt_apparmor_profiles}" ] &&
+    ! grep -q "^${_chatgpt_apparmor_profile_name} (" "${_chatgpt_apparmor_profiles}"; then
+    return 0
+  fi
+
+  if ! apparmor_parser -R "${_chatgpt_apparmor_profile}"; then
+    printf '%s\n' \
+      "warning: chatgpt-desktop: failed to remove AppArmor profile: ${_chatgpt_apparmor_profile}" >&2
+  fi
+}
+
+post_install() {
+  _chatgpt_load_apparmor_profile
+  note 'Custom flags should be put directly in: ~/.config/chatgpt-flags.conf'
+}
+
+post_upgrade() {
+  _chatgpt_load_apparmor_profile
+  note 'Custom flags should be put directly in: ~/.config/chatgpt-flags.conf'
+}
+
+pre_remove() {
+  _chatgpt_remove_apparmor_profile
+}
