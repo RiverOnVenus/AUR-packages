@@ -1,0 +1,145 @@
+# Maintainer: RiverOnVenus <aur@zhui.dev>
+
+pkgname=sidra-bin
+pkgver=1.2.1
+pkgrel=1
+pkgdesc='Apple Music desktop client for Linux'
+arch=('x86_64')
+url='https://github.com/wimpysworld/sidra'
+license=('BlueOak-1.0.0')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'bash'
+  'cairo'
+  'dbus'
+  'expat'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libdrm'
+  'libgcc'
+  'libnotify'
+  'libsecret'
+  'libx11'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxrandr'
+  'libxcb'
+  'libxkbcommon'
+  'libxss'
+  'libxtst'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+)
+optdepends=(
+  'libappindicator: system tray / indicator icon support'
+  'pipewire: PipeWire audio backend'
+  'pulseaudio: PulseAudio audio backend'
+  'xdg-utils: open links in the default browser'
+)
+provides=('sidra')
+conflicts=('sidra')
+options=('!strip' '!debug')
+
+source=(
+  "LICENSE::https://raw.githubusercontent.com/wimpysworld/sidra/${pkgver}/LICENSE"
+)
+source_x86_64=(
+  "${pkgname}-${pkgver}.AppImage::https://github.com/wimpysworld/sidra/releases/download/${pkgver}/Sidra-linux-${CARCH}.AppImage"
+)
+sha256sums=('8a1af140fdfbf5afd3df27f7e662f989c5b963a300020dfafce42033cae9e004')
+sha256sums_x86_64=('8e2a7cee70d3571b9d21384656c6776e7b99537d983cc7e312e834cb8f26280d')
+
+prepare() {
+  cd "$srcdir"
+
+  local appimage="${pkgname}-${pkgver}.AppImage"
+  chmod +x "$appimage"
+  "./$appimage" --appimage-extract >/dev/null
+}
+
+package() {
+  cd "$srcdir"
+
+  local appdir="$pkgdir/opt/sidra"
+  local desktop="$pkgdir/usr/share/applications/sidra.desktop"
+
+  install -dm755 "$appdir"
+  cp -a --no-preserve=ownership squashfs-root/. "$appdir/"
+
+  # Install the desktop entry without changing its MPRIS action commands.
+  if [[ -f squashfs-root/usr/share/applications/sidra.desktop ]]; then
+    install -Dm644 squashfs-root/usr/share/applications/sidra.desktop "$desktop"
+  else
+    install -Dm644 squashfs-root/sidra.desktop "$desktop"
+  fi
+  sed -i '0,/^Exec=/s|^Exec=.*|Exec=/usr/bin/sidra %U|' "$desktop"
+  sed -i 's|^Icon=.*|Icon=sidra|' "$desktop"
+  sed -i 's|^Categories=Audio;$|Categories=AudioVideo;Audio;|' "$desktop"
+
+  # Move icons into the standard system icon hierarchy.
+  if [[ -d "$appdir/usr/share/icons" ]]; then
+    install -dm755 "$pkgdir/usr/share"
+    cp -a --no-preserve=ownership "$appdir/usr/share/icons" "$pkgdir/usr/share/"
+  fi
+  if [[ -f "$appdir/sidra.png" ]]; then
+    install -Dm644 "$appdir/sidra.png" \
+      "$pkgdir/usr/share/icons/hicolor/512x512/apps/sidra.png"
+  fi
+  rm -f "$appdir/sidra.png"
+
+  # The AppImage launcher and desktop file are replaced by the Arch wrapper.
+  rm -f "$appdir/AppRun" "$appdir/.DirIcon" "$appdir/sidra.desktop"
+
+  install -Dm755 /dev/stdin "$pkgdir/usr/bin/sidra" <<'EOF'
+#!/bin/bash
+args=("$@")
+no_sandbox=()
+has_no_sandbox=0
+sandbox_usable=0
+
+for arg in "${args[@]}"; do
+  if [[ "$arg" == '--no-sandbox' ]]; then
+    has_no_sandbox=1
+    break
+  fi
+done
+
+# A setuid sandbox must be executable and owned by root.  This also covers
+# rootless or nosuid installations where the file mode alone is misleading.
+if [[ -x /opt/sidra/chrome-sandbox && -u /opt/sidra/chrome-sandbox ]] &&
+   [[ "$(stat -c '%u' /opt/sidra/chrome-sandbox 2>/dev/null)" == 0 ]]; then
+  sandbox_usable=1
+fi
+
+# Match the AppImage launcher: fall back when unprivileged user namespaces
+# are unavailable, while retaining Electron's sandbox where possible.
+if (( has_no_sandbox == 0 )) &&
+   { (( sandbox_usable == 0 )) || ! unshare -Ur true 2>/dev/null; }; then
+  no_sandbox=('--no-sandbox')
+fi
+
+export SIDRA_DISABLE_AUTO_UPDATE=1
+exec /opt/sidra/sidra "${no_sandbox[@]}" "${args[@]}"
+EOF
+
+  install -Dm644 "$srcdir/LICENSE" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+
+  # Avoid shipping the AppImage's distro-specific duplicate libraries.
+  rm -rf "$appdir/usr"
+
+  chmod -R u=rwX,go=rX "$appdir"
+  chmod -R u=rwX,go=rX "$pkgdir/usr/share/icons"
+  if [[ -f "$appdir/chrome-sandbox" ]]; then
+    chmod 4755 "$appdir/chrome-sandbox"
+  fi
+}
