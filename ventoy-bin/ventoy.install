@@ -12,6 +12,6 @@ post_install() {
 }
 
 post_remove() {
-  # Remove log file
+  # Drop anything the application left in its install directory.
   rm -rf /opt/ventoy/
 }
