@@ -2,3 +2,5 @@
 source = "git"
 git = "https://github.com/daeuniverse/honk.git"
 prefix = "v"
+from_pattern = "-"
+to_pattern = ""
