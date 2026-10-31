@@ -104,9 +104,12 @@ jobs:
             exit 1
           fi
 
-          fail=0
+          owned=0
+          new=0
+          foreign=0
           for pkg in "${listed[@]}"; do
             if grep -qxF "$pkg" /tmp/owned; then
+              owned=$((owned + 1))
               continue
             fi
 
@@ -115,18 +118,20 @@ jobs:
               --get --data-urlencode "arg[]=$pkg" \
               https://aur.archlinux.org/rpc/v5/info); then
               echo "::error::AUR RPC failed while checking $pkg"
-              fail=1
+              foreign=$((foreign + 1))
               continue
             fi
             if [ "$(jq -r '.resultcount' <<<"$rpc")" = "0" ]; then
               echo "$pkg is not on the AUR yet and will be created"
+              new=$((new + 1))
             else
               echo "::error::$pkg exists on the AUR but is not maintained by this account"
-              fail=1
+              foreign=$((foreign + 1))
             fi
           done
 
-          exit "$fail"
+          echo "checked ${#listed[@]} whitelisted packages: ${owned} owned, ${new} new, ${foreign} not owned"
+          [ "$foreign" -eq 0 ]
 
   build:
     runs-on: ubuntu-latest
