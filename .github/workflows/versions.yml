@@ -52,6 +52,8 @@ jobs:
 
           printf '%s\n' "${configured[@]}" > /tmp/configured.txt
           printf '%s\n' "${missing[@]}" > /tmp/missing.txt
+          sed -e 's/#.*//' -e 's/[[:space:]]*$//' rolling-packages.txt |
+            grep -v '^$' > /tmp/rolling.txt || true
           echo "configured=${#configured[@]}" >> "$GITHUB_OUTPUT"
           echo "missing=${#missing[@]}" >> "$GITHUB_OUTPUT"
           echo "non-VCS: $(( ${#configured[@]} + ${#missing[@]} )), configured: ${#configured[@]}, missing: ${#missing[@]}"
@@ -86,21 +88,41 @@ jobs:
           sed -E 's/\x1b\[[0-9;?]*[a-zA-Z]//g' /tmp/check.err |
             tr '\r' '\n' | grep -vE 'Checking:|^[[:space:]]*$' > /tmp/check.clean || true
 
+          # Rolling packages are reported but do not keep the issue open.
+          rolling=$(jq -R -s 'split("\n") | map(select(length > 0))' /tmp/rolling.txt)
+          jq --argjson rolling "$rolling" \
+            '[.[] | select(.pkgbase as $p | ($rolling | index($p)) | not)]' \
+            /tmp/updates.json > /tmp/normal.json
+          jq --argjson rolling "$rolling" \
+            '[.[] | select(.pkgbase as $p | ($rolling | index($p)))]' \
+            /tmp/updates.json > /tmp/rolling-updates.json
+
       - name: Build report
         run: |
           set -o pipefail
-          outdated=$(jq 'length' /tmp/updates.json)
+          normal=$(jq 'length' /tmp/normal.json)
+          rolling=$(jq 'length' /tmp/rolling-updates.json)
           {
             echo "## Outdated packages"
             echo
-            if [ "$outdated" -gt 0 ]; then
+            if [ "$normal" -gt 0 ]; then
               echo "| Package | Local | Upstream |"
               echo "| --- | --- | --- |"
-              jq -r '.[] | "| \(.pkgbase) | \(.local_version) | \(.upstream_version) |"' /tmp/updates.json
+              jq -r '.[] | "| \(.pkgbase) | \(.local_version) | \(.upstream_version) |"' /tmp/normal.json
             else
-              echo "All configured packages are up to date."
+              echo "All non-rolling packages are up to date."
             fi
             echo
+            if [ "$rolling" -gt 0 ]; then
+              echo "## Rolling packages"
+              echo
+              echo "These release frequently and do not keep this issue open."
+              echo
+              echo "| Package | Local | Upstream |"
+              echo "| --- | --- | --- |"
+              jq -r '.[] | "| \(.pkgbase) | \(.local_version) | \(.upstream_version) |"' /tmp/rolling-updates.json
+              echo
+            fi
             if [ -s /tmp/missing.txt ] && [ -n "$(grep -v '^$' /tmp/missing.txt)" ]; then
               echo "## Missing version checks"
               echo
@@ -126,12 +148,18 @@ jobs:
           set -o pipefail
           number=$(gh issue list --state open --limit 100 --json number,title |
             jq -r '.[] | select(.title == "Upstream package updates") | .number' | head -n 1)
-          outdated=$(jq 'length' /tmp/updates.json)
+          outdated=$(jq 'length' /tmp/normal.json)
+          rolling=$(jq 'length' /tmp/rolling-updates.json)
           missing=$(grep -cv '^$' /tmp/missing.txt || true)
 
           if [ "$outdated" -eq 0 ] && [ "$missing" -eq 0 ] && [ ! -s /tmp/check.clean ]; then
             if [ -n "$number" ]; then
-              gh issue close "$number" --comment "All configured packages are up to date."
+              comment="All non-rolling packages are up to date."
+              if [ "$rolling" -gt 0 ]; then
+                comment+=$'\n\nRolling packages:\n'
+                comment+=$(jq -r '.[] | "- \(.pkgbase) \(.local_version) -> \(.upstream_version)"' /tmp/rolling-updates.json)
+              fi
+              gh issue close "$number" --comment "$comment"
             fi
             exit 0
           fi

@@ -1,0 +1,5 @@
+# Packages whose upstream releases too frequently to chase.
+# They are still checked and reported, but do not keep the
+# "Upstream package updates" issue open.
+alma-desktop-bin
+magpie-bin
