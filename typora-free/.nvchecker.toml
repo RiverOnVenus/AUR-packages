@@ -1,4 +1,5 @@
 [typora-free]
-# Frozen free build; no upstream updates.
-source = "manual"
-manual = "0.11.18"
+# Frozen free build; the AUR package is the update signal.
+source = "aur"
+aur = "typora-free"
+strip_release = true

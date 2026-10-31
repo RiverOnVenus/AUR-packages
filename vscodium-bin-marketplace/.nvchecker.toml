@@ -1,4 +1,5 @@
 [vscodium-bin-marketplace]
-# Local helper; its version tracks the bundled product, not an upstream release.
-source = "manual"
-manual = "1.76.0"
+# Local helper; the AUR package is the update signal.
+source = "aur"
+aur = "vscodium-bin-marketplace"
+strip_release = true

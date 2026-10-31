@@ -1,4 +1,5 @@
 [furmark]
-# No parseable version on the vendor pages.
-source = "manual"
-manual = "2.10.2"
+# The vendor pages expose no version; the AUR package is the update signal.
+source = "aur"
+aur = "furmark"
+strip_release = true

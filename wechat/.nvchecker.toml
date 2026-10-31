@@ -1,4 +1,5 @@
 [wechat]
-# Local wrapper; tracks wechat-bin, which has no versioned upstream URL.
-source = "manual"
-manual = "18"
+# Tracks the AUR wrapper. The epoch must be stripped for pkgctl's comparison.
+source = "regex"
+url = "https://aur.archlinux.org/rpc/v5/info?arg[]=wechat"
+regex = "\"Version\":\"(?:[0-9]+:)?([0-9][^\"]*)-[0-9]+\""

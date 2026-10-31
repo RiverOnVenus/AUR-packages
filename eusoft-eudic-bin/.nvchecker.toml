@@ -1,4 +1,5 @@
 [eusoft-eudic-bin]
-# Unversioned vendor URL; the version lives inside the AppImage.
-source = "manual"
-manual = "26.9.1"
+# The vendor URL is unversioned; the AUR package is the update signal.
+source = "aur"
+aur = "eusoft-eudic-bin"
+strip_release = true

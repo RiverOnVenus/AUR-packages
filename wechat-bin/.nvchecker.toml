@@ -1,4 +1,5 @@
 [wechat-bin]
-# Unversioned vendor URL; the version lives inside the control archive.
-source = "manual"
-manual = "4.1.13.26"
+# The vendor URL is unversioned; the AUR package is the update signal.
+source = "aur"
+aur = "wechat-bin"
+strip_release = true
