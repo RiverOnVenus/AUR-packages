@@ -3,8 +3,8 @@
 # Contributor: Jack Chen <redchenjs@live.com>
 
 pkgname=motrix-bin
-pkgver=1.8.19
-pkgrel=3
+pkgver=2.1.1
+pkgrel=1
 
 pkgdesc="A full-featured download manager (binary version)"
 arch=('x86_64')
@@ -17,11 +17,15 @@ changelog="changelog.md"
 
 source=("https://github.com/agalwood/Motrix/releases/download/v${pkgver}/Motrix_${pkgver}_amd64.deb"
         "LICENSE::https://raw.githubusercontent.com/agalwood/Motrix/v${pkgver}/LICENSE")
-sha512sums=('8a3dab9c731268c2291f286d8efa7815046bbe00046deb938db061863d3ad3e14ddcb50ba4a7e44ada2c11d196d660bb6a762af4e6e589ddb38692266010e61a'
-            '568280070856bdc3d2998fbf3a28c3f4e32ee091144aebbc87df89dcf5e71398a56bfc88c0cc34e291fcfd89a740aa95c74d5db533a528f6ce86c930545ee9cc')
+sha512sums=('2ec4e6c9fb5370e9f217ab6fa40e76b6549fab2a7d2529f9ab4ea92f3aadc422f3b79c22fdbb7896bdc14b4a6e9a3356518fd1f230cbb340feec144a389f8666'
+            '0c5155a42c4a624fe45199e604056a72843ce13550b998cabfdd492557e4bdb4f3736a0772b53017e670b6373c4fb423065d98f58d9d379be626b9024386c95b')
 
 package() {
 	tar -xf "$srcdir/data.tar.xz" -C "$pkgdir/"
+
+	# Upstream ships several files world-writable.
+	find "$pkgdir" -type f -perm -0002 -exec chmod o-w {} +
+	find "$pkgdir" -type d -perm -0002 -exec chmod o-w {} +
 
 	# Link to the binary
 	mkdir -p "$pkgdir/usr/bin"
