@@ -1,0 +1,4 @@
+[motrix-bin]
+source = "git"
+git = "https://github.com/agalwood/Motrix.git"
+prefix = "v"

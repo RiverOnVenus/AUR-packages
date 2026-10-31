@@ -1,0 +1,4 @@
+[wechat]
+# Local wrapper; tracks wechat-bin, which has no versioned upstream URL.
+source = "manual"
+manual = "18"

@@ -1,0 +1,4 @@
+[alma-desktop-bin]
+source = "git"
+git = "https://github.com/yetone/alma-releases.git"
+prefix = "v"

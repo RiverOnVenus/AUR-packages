@@ -1,0 +1,4 @@
+[honk-core-bin]
+source = "git"
+git = "https://github.com/daeuniverse/honk.git"
+prefix = "v"

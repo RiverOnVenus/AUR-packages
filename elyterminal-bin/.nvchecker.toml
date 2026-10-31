@@ -1,0 +1,4 @@
+[elyterminal-bin]
+source = "git"
+git = "https://github.com/ELY-Open-Source/ELYTerminal.git"
+prefix = "v"

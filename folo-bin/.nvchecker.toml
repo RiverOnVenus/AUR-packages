@@ -1,0 +1,5 @@
+[folo-bin]
+source = "git"
+git = "https://github.com/RSSNext/Folo.git"
+include_regex = "desktop@.*"
+prefix = "desktop@"

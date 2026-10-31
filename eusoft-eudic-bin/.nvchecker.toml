@@ -1,0 +1,4 @@
+[eusoft-eudic-bin]
+# Unversioned vendor URL; the version lives inside the AppImage.
+source = "manual"
+manual = "26.9.1"

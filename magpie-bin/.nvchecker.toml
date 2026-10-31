@@ -1,0 +1,4 @@
+[magpie-bin]
+source = "git"
+git = "https://github.com/yetone/magpie.git"
+prefix = "v"

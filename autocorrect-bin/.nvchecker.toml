@@ -1,0 +1,4 @@
+[autocorrect-bin]
+source = "git"
+git = "https://github.com/huacnlee/autocorrect.git"
+prefix = "v"

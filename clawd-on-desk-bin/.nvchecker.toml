@@ -1,0 +1,4 @@
+[clawd-on-desk-bin]
+source = "git"
+git = "https://github.com/rullerzhou-afk/clawd-on-desk.git"
+prefix = "v"

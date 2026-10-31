@@ -1,0 +1,4 @@
+[uu-remote-linux]
+source = "git"
+git = "https://github.com/VallierDev/uu-remote-linux.git"
+prefix = "v"

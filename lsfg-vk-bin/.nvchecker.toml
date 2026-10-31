@@ -1,0 +1,4 @@
+[lsfg-vk-bin]
+source = "regex"
+url = "https://builds.lsfg-vk.dev/"
+regex = "lsfg-vk-([0-9]+\\.[0-9]+\\.[0-9]+)\\.tar\\.xz"

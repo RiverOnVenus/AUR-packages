@@ -1,0 +1,4 @@
+[furmark]
+# No parseable version on the vendor pages.
+source = "manual"
+manual = "2.10.2"

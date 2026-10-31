@@ -1,0 +1,4 @@
+[delance-langserver]
+source = "git"
+git = "https://git.sr.ht/~self/delance-runtime"
+prefix = "v"

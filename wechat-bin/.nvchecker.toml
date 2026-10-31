@@ -1,0 +1,4 @@
+[wechat-bin]
+# Unversioned vendor URL; the version lives inside the control archive.
+source = "manual"
+manual = "4.1.13.26"

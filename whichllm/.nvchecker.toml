@@ -1,0 +1,4 @@
+[whichllm]
+source = "git"
+git = "https://github.com/Andyyyy64/whichllm.git"
+prefix = "v"

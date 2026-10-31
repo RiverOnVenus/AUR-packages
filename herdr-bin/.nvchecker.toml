@@ -1,0 +1,4 @@
+[herdr-bin]
+source = "git"
+git = "https://github.com/herdrdev/herdr.git"
+prefix = "v"

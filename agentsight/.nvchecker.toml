@@ -1,0 +1,4 @@
+[agentsight]
+source = "git"
+git = "https://github.com/eunomia-bpf/agentsight.git"
+prefix = "v"

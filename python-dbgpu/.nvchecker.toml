@@ -1,0 +1,3 @@
+[python-dbgpu]
+source = "git"
+git = "https://github.com/painebenjamin/dbgpu.git"

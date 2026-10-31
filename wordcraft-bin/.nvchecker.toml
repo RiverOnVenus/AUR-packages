@@ -1,0 +1,4 @@
+[wordcraft-bin]
+source = "git"
+git = "https://github.com/storytold/wordcraft.git"
+prefix = "v"

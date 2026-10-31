@@ -1,0 +1,4 @@
+[openlist-bin]
+source = "git"
+git = "https://github.com/OpenListTeam/OpenList.git"
+prefix = "v"

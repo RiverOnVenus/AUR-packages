@@ -1,0 +1,4 @@
+[vscodium-bin-marketplace]
+# Local helper; its version tracks the bundled product, not an upstream release.
+source = "manual"
+manual = "1.76.0"

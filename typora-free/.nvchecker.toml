@@ -1,0 +1,4 @@
+[typora-free]
+# Frozen free build; no upstream updates.
+source = "manual"
+manual = "0.11.18"
