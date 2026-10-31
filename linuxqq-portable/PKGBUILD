@@ -4,37 +4,54 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=linuxqq-portable
-pkgver=3.2.34_53644
+pkgver=3.2.35_54395
 pkgrel=1
 epoch=1
 pkgdesc="Linux QQ based on Electron, sandboxed by portable"
-makedepends=('desktop-file-utils' 'linuxqq' 'portable-packer')
 arch=('x86_64')
 url="https://im.qq.com/linuxqq"
 license=('LicenseRef-QQ')
-conflicts=("linuxqq")
-provides=("linuxqq")
+conflicts=('linuxqq')
+provides=('linuxqq')
 depends=('nss' 'alsa-lib' 'gtk3' 'at-spi2-core' 'libvips' 'openjpeg2' 'openslide' 'portable' 'libappindicator-gtk3')
-source=("linuxqq.sh" "config.toml" "im.qq.app.desktop")
-sha512sums=('f9518c98958349ff50348fada6f0806f3528786d57e44960e3dfeaa7f6320c86901fd68197ec78097442ee25f713cc736df3aff99fe249b2bfe0df4c021fcacb'
-            '590a3775dacac264cf9fb12ca886eb1077fabcaa39153b70bf144c0cda61e530e400fa078a42d1d7e8202c937b863d095bb89e5b94623c971b1694d6cdcde584'
-            '05d9b95214f444f56ea1b2b6c9eb9456de1e403ab8f1a3025ccc4323618f54a697b107007de72e24161f1e044fee4f035c79573af8209cb6abfc3d70067b92c2')
 options=('!strip' '!debug')
 
+_debver="${pkgver/_/-}"
+source=(
+  "linuxqq-${_debver}-amd64.deb::https://qqdl.gtimg.cn/qqfile/QQNT/9.9.37/beta/816b3c79/linuxqq_${_debver}_amd64.deb"
+  "linuxqq.sh"
+  "linuxqq"
+  "linuxqq-portable"
+  "config.toml"
+  "im.qq.app.desktop"
+)
+sha512sums=(
+  'c1dc085f2b50702a7c408aa6b89754ea5588c0646cf259fdf5c34a63f9883e0617008d6503469e6ae25e85bd1fd4063b56d8479dcd86529587c21a7f7316e95c'
+  'f9518c98958349ff50348fada6f0806f3528786d57e44960e3dfeaa7f6320c86901fd68197ec78097442ee25f713cc736df3aff99fe249b2bfe0df4c021fcacb'
+  '81ae58f2a9256055d3b528bad1f1befb2511ae8e71a18d4fd4253d5a2c952483ca2c23b870f07c30df8ba28b850a1b147794a2240af4564e413a2b836b62bbb5'
+  '101bee82427b1485ede203cabf8da1a21cbef03f24b1f632134c7bcbfc03a3025bf9244435118ead8ba63607340bc0c0eb1592d6e64284e89cc6eb5d111d3486'
+  '590a3775dacac264cf9fb12ca886eb1077fabcaa39153b70bf144c0cda61e530e400fa078a42d1d7e8202c937b863d095bb89e5b94623c971b1694d6cdcde584'
+  '05d9b95214f444f56ea1b2b6c9eb9456de1e403ab8f1a3025ccc4323618f54a697b107007de72e24161f1e044fee4f035c79573af8209cb6abfc3d70067b92c2'
+)
+
 package() {
-  declare -x -g pkgdir
-  declare -x -g pkgname
-  declare -x -g srcdir
+  bsdtar -xf data.tar.xz -C "$pkgdir/"
 
-  install -vDm755 "${srcdir}/linuxqq.sh" "${pkgdir}/usr/bin/linuxqq-start"
+  # The vendor desktop entry points at /opt/QQ/qq; ship the portable one instead.
+  rm -f "$pkgdir/usr/share/applications/qq.desktop"
 
-  portable-packer \
-    -v \
-    --distro arch \
-    --mode copy linuxqq \
-    --hash true \
-    --config-ng "${srcdir}/config.toml" \
-    --desktop-file "${srcdir}/im.qq.app.desktop"
+  # Remove libraries that conflict with the system copies, as the AUR package does.
+  rm -fv "$pkgdir/opt/QQ/resources/app/avsdk/bugly/libssh2.so.1" \
+         "$pkgdir/opt/QQ/resources/app/libssh2.so.1" \
+         "$pkgdir/opt/QQ/resources/app/sharp-lib/libvips-cpp.so.42"
 
+  install -Dm755 linuxqq.sh "$pkgdir/usr/lib/portable/info/im.qq.app/bin/linuxqq-start"
+  install -Dm755 linuxqq "$pkgdir/usr/lib/portable/info/im.qq.app/bin/linuxqq"
+  install -Dm755 linuxqq-portable "$pkgdir/usr/lib/portable/info/im.qq.app/bin/linuxqq-portable"
+  install -Dm755 linuxqq-portable "$pkgdir/usr/bin/linuxqq-portable"
+  install -Dm644 config.toml "$pkgdir/usr/lib/portable/info/im.qq.app/config.toml"
+  install -Dm644 im.qq.app.desktop "$pkgdir/usr/share/applications/im.qq.app.desktop"
 
+  install -Dm644 "$pkgdir/opt/QQ/LICENSE.electron.txt" -t "$pkgdir/usr/share/licenses/$pkgname/"
+  install -Dm644 "$pkgdir/opt/QQ/LICENSES.chromium.html" -t "$pkgdir/usr/share/licenses/$pkgname/"
 }

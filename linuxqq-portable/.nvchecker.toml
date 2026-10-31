@@ -1,5 +1,4 @@
-# The application version is pinned by portable-arch; the vendor page has no stable version feed.
 [linuxqq-portable]
 source = "regex"
-url = "https://raw.githubusercontent.com/Kraftland/portable-arch/master/x86_64/linuxqq-portable/PKGBUILD"
-regex = "(?m)^pkgver=([^\\n]+)"
+url = "https://aur.archlinux.org/rpc/v5/info?arg[]=linuxqq"
+regex = "\"Version\":\"(?:[0-9]+:)?([0-9][^\"]*)-[0-9]+\""

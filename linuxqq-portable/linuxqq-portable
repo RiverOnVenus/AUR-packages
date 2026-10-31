@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+export PORTABLE_CONF=im.qq.app
+exec portable --file-forwarding -- "$@"
