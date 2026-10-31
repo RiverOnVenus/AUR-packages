@@ -37,13 +37,9 @@ jobs:
           missing=()
           for pkgbuild in */PKGBUILD; do
             pkg=${pkgbuild%/PKGBUILD}
-            srcinfo=$(cd "$pkg" && makepkg --printsrcinfo 2>/dev/null) || {
-              echo "::warning::$pkg: could not read PKGBUILD"
-              continue
-            }
-            # VCS packages are refreshed by devel.yml instead.
-            if printf '%s\n' "$srcinfo" |
-              grep -qE '^[[:space:]]*source(_[a-z0-9]+)? = [^ ]*(git|svn|hg|bzr)\+'; then
+            # devel.yml refreshes non-bin packages that define pkgver().
+            # Everything else, including -bin packages with pkgver(), needs a check.
+            if grep -q 'pkgver()' "$pkgbuild" && [[ $pkg != *-bin ]]; then
               continue
             fi
             if [ -f "$pkg/.nvchecker.toml" ]; then
@@ -69,10 +65,25 @@ jobs:
         run: |
           set -o pipefail
           mapfile -t configured < /tmp/configured.txt
-          if ! pkgctl version check --json "${configured[@]}" > /tmp/updates.json 2>/tmp/check.err; then
-            echo "failed=1" >> "$GITHUB_OUTPUT"
+          rc=0
+          pkgctl version check --json "${configured[@]}" > /tmp/updates.json 2>/tmp/check.err || rc=$?
+          case "$rc" in
+            0) ;;
+            *) echo "failed=1" >> "$GITHUB_OUTPUT" ;;
+          esac
+
+          # Keep only out-of-date entries; a lone up-to-date package is
+          # still included in the JSON.
+          if jq -e 'type == "array"' /tmp/updates.json >/dev/null 2>&1; then
+            jq '[.[] | select(.out_of_date == true)]' /tmp/updates.json > /tmp/updates.filtered
+            mv /tmp/updates.filtered /tmp/updates.json
+          else
+            echo '[]' > /tmp/updates.json
           fi
-          jq 'length' /tmp/updates.json >/dev/null 2>&1 || echo '[]' > /tmp/updates.json
+
+          # A successful run still writes terminal control sequences to stderr.
+          sed -E 's/\x1b\[[0-9;?]*[a-zA-Z]//g' /tmp/check.err |
+            tr '\r' '\n' | grep -vE 'Checking:|^[[:space:]]*$' > /tmp/check.clean || true
 
       - name: Build report
         run: |
@@ -97,12 +108,11 @@ jobs:
               grep -v '^$' /tmp/missing.txt | sed 's/^/- /'
               echo
             fi
-            if [ -s /tmp/check.err ]; then
+            if [ -s /tmp/check.clean ]; then
               echo "## Check errors"
               echo
               echo '```'
-              sed -E 's/\x1b\[[0-9;?]*[a-zA-Z]//g' /tmp/check.err |
-                tr '\r' '\n' | grep -vE 'Checking:|^$' | tail -30
+              tail -30 /tmp/check.clean
               echo '```'
             fi
             echo
@@ -118,7 +128,7 @@ jobs:
           outdated=$(jq 'length' /tmp/updates.json)
           missing=$(grep -cv '^$' /tmp/missing.txt || true)
 
-          if [ "$outdated" -eq 0 ] && [ "$missing" -eq 0 ] && [ ! -s /tmp/check.err ]; then
+          if [ "$outdated" -eq 0 ] && [ "$missing" -eq 0 ] && [ ! -s /tmp/check.clean ]; then
             if [ -n "$number" ]; then
               gh issue close "$number" --comment "All configured packages are up to date."
             fi
