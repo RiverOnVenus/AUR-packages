@@ -1,0 +1,3 @@
+[python-thefuzz]
+source = "git"
+git = "https://github.com/seatgeek/thefuzz.git"
