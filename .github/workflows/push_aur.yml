@@ -239,6 +239,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
+          set -o pipefail
           mkdir -p new
           shopt -s nullglob
           packages=(new/*.pkg.tar.zst)
@@ -247,6 +248,24 @@ jobs:
             gh release download zhui-arch -p 'zhui-arch.db' -p 'zhui-arch.files' -D . --clobber >/dev/null 2>&1 || true
             [ -f zhui-arch.db ] && mv -f zhui-arch.db zhui-arch.db.tar.gz
             [ -f zhui-arch.files ] && mv -f zhui-arch.files zhui-arch.files.tar.gz
+
+            # Never rebuild the database from scratch: an incomplete one would
+            # replace the release database and make the prune step delete every
+            # package asset it does not list.
+            if [ ! -f zhui-arch.db.tar.gz ] || [ ! -f zhui-arch.files.tar.gz ]; then
+              echo "::error::could not download the existing database"
+              exit 1
+            fi
+            if ! bsdtar -tf zhui-arch.db.tar.gz >/dev/null 2>&1 ||
+              ! bsdtar -tf zhui-arch.files.tar.gz >/dev/null 2>&1; then
+              echo "::error::downloaded database is not a valid archive"
+              exit 1
+            fi
+            if ! bsdtar -xOf zhui-arch.db.tar.gz --include='*/desc' |
+              awk '/^%NAME%$/{ found = 1 } END { exit !found }'; then
+              echo "::error::downloaded database has no package entries"
+              exit 1
+            fi
           else
             echo "exists=0" >> "$GITHUB_OUTPUT"
           fi
