@@ -1,4 +1,5 @@
-# Maintainer: RiverOnVenus <aur@zhui.dev>
+# Maintainer: zxp19821005 <zxp19821005 at 163 dot com>
+# Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=clawd-on-desk-bin
 _pkgname='Clawd on Desk'
