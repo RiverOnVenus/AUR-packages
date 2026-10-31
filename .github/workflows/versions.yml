@@ -4,8 +4,9 @@ name: "Check upstream versions"
 # keeps a single issue with the results. It never edits packages.
 on:
   schedule:
-    # Weekly on Monday at 04:00 UTC, after devel.yml on Sunday.
-    - cron: "0 4 * * 1"
+    # Every other day at 04:00 UTC. Day-of-month stepping means a month
+    # boundary can produce two consecutive runs.
+    - cron: "0 4 */2 * *"
   workflow_dispatch:
 
 permissions:
