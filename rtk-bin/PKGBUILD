@@ -1,0 +1,28 @@
+# Maintainer: Benigno B. Junior <benignobjunior@gmail.com>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=rtk-bin
+pkgver=1.1.0
+pkgrel=1
+pkgdesc='CLI proxy that reduces LLM token consumption by 60-90% on common dev commands'
+arch=('x86_64' 'aarch64')
+url='https://github.com/rtk-ai/rtk'
+license=('Apache-2.0' 'BUSL-1.1')
+provides=('rtk')
+conflicts=('rtk')
+# The x86_64 asset is statically linked against musl; the aarch64 asset is glibc-linked.
+depends=()
+depends_aarch64=('glibc' 'libgcc')
+# The release binaries are already stripped, so a debug package would be empty.
+options=('!debug')
+
+source_x86_64=("${pkgname}-x86_64-${pkgver}.tar.gz::${url}/releases/download/v${pkgver}/rtk-x86_64-unknown-linux-musl.tar.gz")
+source_aarch64=("${pkgname}-aarch64-${pkgver}.tar.gz::${url}/releases/download/v${pkgver}/rtk-aarch64-unknown-linux-gnu.tar.gz")
+sha256sums_x86_64=('9454ad1b9489daa57ab0a9f4ebe2faaf4dc82b8a0f26c9e5135151abd7c9378d')
+sha256sums_aarch64=('a5c00c3ab0129884bcb757d348afc1a650efa0f4f0769da97c341f28f89719ed')
+
+package() {
+  install -Dm755 rtk "${pkgdir}/usr/bin/rtk"
+  # LICENSE-ENGINE covers the bundled rtk-engine under the Business Source License.
+  install -Dm644 LICENSE LICENSE-ENGINE -t "${pkgdir}/usr/share/licenses/${pkgname}/"
+}

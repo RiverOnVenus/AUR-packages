@@ -1,0 +1,6 @@
+[rtk-bin]
+source = "git"
+git = "https://github.com/rtk-ai/rtk.git"
+prefix = "v"
+# Upstream also tags every dev build as dev-<version>-rc.<n>.
+exclude_regex = "^dev-"
