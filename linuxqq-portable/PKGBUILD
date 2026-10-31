@@ -1,0 +1,40 @@
+# Maintainer: Shinnka
+# Contributor: Purofle <purofle@gmail.com>
+# Contributor: Integral <integral@member.fsf.org>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=linuxqq-portable
+pkgver=3.2.34_53644
+pkgrel=1
+epoch=1
+pkgdesc="Linux QQ based on Electron, sandboxed by portable"
+makedepends=('desktop-file-utils' 'linuxqq' 'portable-packer')
+arch=('x86_64')
+url="https://im.qq.com/linuxqq"
+license=('LicenseRef-QQ')
+conflicts=("linuxqq")
+provides=("linuxqq")
+depends=('nss' 'alsa-lib' 'gtk3' 'at-spi2-core' 'libvips' 'openjpeg2' 'openslide' 'portable' 'libappindicator-gtk3')
+source=("linuxqq.sh" "config.toml" "im.qq.app.desktop")
+sha512sums=('f9518c98958349ff50348fada6f0806f3528786d57e44960e3dfeaa7f6320c86901fd68197ec78097442ee25f713cc736df3aff99fe249b2bfe0df4c021fcacb'
+            '590a3775dacac264cf9fb12ca886eb1077fabcaa39153b70bf144c0cda61e530e400fa078a42d1d7e8202c937b863d095bb89e5b94623c971b1694d6cdcde584'
+            '05d9b95214f444f56ea1b2b6c9eb9456de1e403ab8f1a3025ccc4323618f54a697b107007de72e24161f1e044fee4f035c79573af8209cb6abfc3d70067b92c2')
+options=('!strip' '!debug')
+
+package() {
+  declare -x -g pkgdir
+  declare -x -g pkgname
+  declare -x -g srcdir
+
+  install -vDm755 "${srcdir}/linuxqq.sh" "${pkgdir}/usr/bin/linuxqq-start"
+
+  portable-packer \
+    -v \
+    --distro arch \
+    --mode copy linuxqq \
+    --hash true \
+    --config-ng "${srcdir}/config.toml" \
+    --desktop-file "${srcdir}/im.qq.app.desktop"
+
+
+}

@@ -1,0 +1,21 @@
+[Desktop Entry]
+Name=QQ
+Exec=/usr/bin/linuxqq-portable %U
+Terminal=false
+Type=Application
+Icon=qq
+StartupWMClass=QQ
+Categories=Network
+Comment=QQ sandboxed by Portable
+Actions=opendir;quit
+SingleMainWindow=true
+
+[Desktop Action opendir]
+Name=Open Data Home
+Exec=env PORTABLE_CONF="im.qq.app" portable --actions opendir
+Icon=go-home-symbolic
+
+[Desktop Action quit]
+Name=Quit QQ
+Exec=env PORTABLE_CONF="im.qq.app" portable --actions quit
+Icon=system-log-out-symbolic
