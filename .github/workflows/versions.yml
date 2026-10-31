@@ -1,0 +1,144 @@
+name: "Check upstream versions"
+
+# Compares every non-VCS package against upstream with pkgctl/nvchecker and
+# keeps a single issue with the results. It never edits packages.
+on:
+  schedule:
+    # Weekly on Monday at 04:00 UTC, after devel.yml on Sunday.
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: versions
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: pacman -Syu --noconfirm --needed nvchecker devtools git github-cli jq
+
+      - name: Collect packages
+        id: collect
+        run: |
+          set -o pipefail
+          configured=()
+          missing=()
+          for pkgbuild in */PKGBUILD; do
+            pkg=${pkgbuild%/PKGBUILD}
+            srcinfo=$(cd "$pkg" && makepkg --printsrcinfo 2>/dev/null) || {
+              echo "::warning::$pkg: could not read PKGBUILD"
+              continue
+            }
+            # VCS packages are refreshed by devel.yml instead.
+            if printf '%s\n' "$srcinfo" |
+              grep -qE '^[[:space:]]*source(_[a-z0-9]+)? = [^ ]*(git|svn|hg|bzr)\+'; then
+              continue
+            fi
+            if [ -f "$pkg/.nvchecker.toml" ]; then
+              configured+=("$pkg")
+            else
+              missing+=("$pkg")
+            fi
+          done
+
+          printf '%s\n' "${configured[@]}" > /tmp/configured.txt
+          printf '%s\n' "${missing[@]}" > /tmp/missing.txt
+          echo "configured=${#configured[@]}" >> "$GITHUB_OUTPUT"
+          echo "missing=${#missing[@]}" >> "$GITHUB_OUTPUT"
+          echo "non-VCS: $(( ${#configured[@]} + ${#missing[@]} )), configured: ${#configured[@]}, missing: ${#missing[@]}"
+
+          if [ ${#configured[@]} -eq 0 ]; then
+            echo "::error::no non-VCS package has a version check"
+            exit 1
+          fi
+
+      - name: Check versions
+        id: check
+        run: |
+          set -o pipefail
+          mapfile -t configured < /tmp/configured.txt
+          if ! pkgctl version check --json "${configured[@]}" > /tmp/updates.json 2>/tmp/check.err; then
+            echo "failed=1" >> "$GITHUB_OUTPUT"
+          fi
+          jq 'length' /tmp/updates.json >/dev/null 2>&1 || echo '[]' > /tmp/updates.json
+
+      - name: Build report
+        run: |
+          set -o pipefail
+          outdated=$(jq 'length' /tmp/updates.json)
+          {
+            echo "## Outdated packages"
+            echo
+            if [ "$outdated" -gt 0 ]; then
+              echo "| Package | Local | Upstream |"
+              echo "| --- | --- | --- |"
+              jq -r '.[] | "| \(.pkgbase) | \(.local_version) | \(.upstream_version) |"' /tmp/updates.json
+            else
+              echo "All configured packages are up to date."
+            fi
+            echo
+            if [ -s /tmp/missing.txt ] && [ -n "$(grep -v '^$' /tmp/missing.txt)" ]; then
+              echo "## Missing version checks"
+              echo
+              echo "These non-VCS packages have no \`.nvchecker.toml\`:"
+              echo
+              grep -v '^$' /tmp/missing.txt | sed 's/^/- /'
+              echo
+            fi
+            if [ -s /tmp/check.err ]; then
+              echo "## Check errors"
+              echo
+              echo '```'
+              sed -E 's/\x1b\[[0-9;?]*[a-zA-Z]//g' /tmp/check.err |
+                tr '\r' '\n' | grep -vE 'Checking:|^$' | tail -30
+              echo '```'
+            fi
+            echo
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > /tmp/report.md
+          cat /tmp/report.md
+
+      - name: Open or update issue
+        run: |
+          set -o pipefail
+          number=$(gh issue list --state open --limit 100 --json number,title |
+            jq -r '.[] | select(.title == "Upstream package updates") | .number' | head -n 1)
+          outdated=$(jq 'length' /tmp/updates.json)
+          missing=$(grep -cv '^$' /tmp/missing.txt || true)
+
+          if [ "$outdated" -eq 0 ] && [ "$missing" -eq 0 ] && [ ! -s /tmp/check.err ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" --comment "All configured packages are up to date."
+            fi
+            exit 0
+          fi
+
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file /tmp/report.md
+          else
+            gh issue create --title "Upstream package updates" --body-file /tmp/report.md
+          fi
+
+      - name: Fail when a package has no version check
+        if: steps.collect.outputs.missing != '0'
+        run: |
+          echo "::error::non-VCS packages without .nvchecker.toml: $(grep -v '^$' /tmp/missing.txt | tr '\n' ' ')"
+          exit 1
+
+      - name: Fail when the version check errored
+        if: steps.check.outputs.failed == '1'
+        run: |
+          echo "::error::pkgctl version check failed; see the issue for details"
+          exit 1

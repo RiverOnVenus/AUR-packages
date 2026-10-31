@@ -39,7 +39,7 @@ jobs:
           if [ "$EVENT" = "workflow_dispatch" ] && [ -n "$REQUESTED" ]; then
             read -r -a candidates <<< "$REQUESTED"
           elif [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            mapfile -t changed < <(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+            mapfile -t changed < <(git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -v '/\.nvchecker\.toml$' || true)
             mapfile -t dirs < <(printf '%s\n' "${changed[@]}" | cut -d/ -f1 | sort -u)
             # A push that only edits the whitelist must still build the packages
             # it added, otherwise they never reach the AUR.
@@ -193,6 +193,8 @@ jobs:
           shopt -s extglob
           rm ../aur/!(.git|.|..) || true
           cp -r ${{ matrix.name }}/*  ../aur
+          # Version-check metadata stays in the repository, not in the AUR.
+          rm -f ../aur/.nvchecker.toml
           cd ../aur
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
