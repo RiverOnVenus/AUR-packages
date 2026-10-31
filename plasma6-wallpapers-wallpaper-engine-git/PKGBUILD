@@ -50,7 +50,11 @@ prepare(){
 }
 pkgver(){
     cd "${srcdir}/${pkgname}"
-    git describe --tags --long | sed 's/v//;s/-/.r/;s/-/./g'
+    (
+      set -o pipefail
+      git describe --tags --long | sed 's/v//;s/-/.r/;s/-/./g' \
+        || printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+    )
 }
 build(){
     cmake -B build -S "${srcdir}/${pkgname}" -G Ninja \
