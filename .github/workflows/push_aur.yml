@@ -78,9 +78,59 @@ jobs:
       matrix: ${{ steps.gen-matrix.outputs.matrix }}
       count: ${{ steps.gen-matrix.outputs.count }}
 
-  build:
+  preflight:
     runs-on: ubuntu-latest
     needs: generate-matrix
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install SSH key
+        # Pinned to v2 as of 2026-10; bump deliberately.
+        uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Verify AUR maintainership
+        run: |
+          set -o pipefail
+          parse_aur() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
+          mapfile -t listed < <(parse_aur < aur-packages.txt)
+
+          # list-repos prints one package base per line, with a leading space.
+          if ! ssh -o BatchMode=yes aur@aur.archlinux.org list-repos |
+            awk '{print $1}' | sort -u > /tmp/owned; then
+            echo "::error::could not read the AUR package list"
+            exit 1
+          fi
+
+          fail=0
+          for pkg in "${listed[@]}"; do
+            if grep -qxF "$pkg" /tmp/owned; then
+              continue
+            fi
+
+            # A name that is not on the AUR yet is created by its first push.
+            if ! rpc=$(curl -fsS --retry 3 --retry-delay 2 --max-time 20 \
+              --get --data-urlencode "arg[]=$pkg" \
+              https://aur.archlinux.org/rpc/v5/info); then
+              echo "::error::AUR RPC failed while checking $pkg"
+              fail=1
+              continue
+            fi
+            if [ "$(jq -r '.resultcount' <<<"$rpc")" = "0" ]; then
+              echo "$pkg is not on the AUR yet and will be created"
+            else
+              echo "::error::$pkg exists on the AUR but is not maintained by this account"
+              fail=1
+            fi
+          done
+
+          exit "$fail"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [generate-matrix, preflight]
     if: needs.generate-matrix.outputs.count != '0'
     strategy:
       fail-fast: false
