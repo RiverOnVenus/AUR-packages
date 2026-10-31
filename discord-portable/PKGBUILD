@@ -1,0 +1,43 @@
+# Maintainer: Kimiblock Moe
+# Contributor: Filipe Laíns (FFY00) <lains@archlinux.org>
+# Contributor: Morgan <morganamilo@archlinux.org>
+# Contributor: T.J. Townsend <blakkheim@archlinux.org>
+# Contributor: Robin Candau <antiz@archlinux.org>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=discord-portable
+_pkgname=Discord
+pkgver=1.0.158
+pkgrel=1
+epoch=1
+pkgdesc="All-in-one voice and text chat for gamers. Sandboxed for privacy."
+arch=('x86_64')
+url='https://discord.com'
+license=('LicenseRef-Discord')
+conflicts=("discord")
+makedepends=('portable-packer' 'discord')
+provides=("discord" "discord-sandbox")
+depends=('libnotify' 'libxss' 'nspr' 'nss' 'gtk3' 'libpulse' 'libappindicator-gtk3' 'portable')
+options=(!debug !strip)
+replaces=('discord-bwrap')
+source=(
+	"config.toml"
+	"discord.sh"
+	"discord.desktop"
+)
+sha512sums=('0e0f282b6e477a451c9c8953e2136b063b63c73795a51f46e18def94a71789c8dd130951fdabf8886452f282260f433c4a2bc2d81aa06253689e62b0e4453358'
+            '412d788d281267800c9f9fe65ac356b943aeac2c66a12fba50f5a2012387b18626ab3e8dcce915f0f7330998959320b451b0cc88acf8457c8ed74ae9ed674399'
+            '44215c65b1eac1e15d07472222269b4e7f569ca0d05bd00a67fbd49b619be3b9c01ed97ed99603f47fdc8425d16be7e8f0788c362d38a58e24df57b4c842e0db')
+
+package() {
+	export pkgdir
+	export pkgname
+	export srcdir
+	portable-packer \
+		-v \
+		--distro arch \
+		--mode copy discord \
+		--hash true \
+		--config-ng "${srcdir}/config.toml" \
+		--desktop-file "${srcdir}/discord.desktop"
+}

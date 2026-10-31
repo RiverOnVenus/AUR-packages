@@ -1,0 +1,22 @@
+[Desktop Entry]
+Name=Discord
+StartupWMClass=discord
+Comment=All-in-one voice and text chat for gamers that's free, secure, and works on both your desktop and phone.
+GenericName=Internet Messenger
+Exec=/usr/bin/discord-portable --url -- %u
+Icon=discord
+Type=Application
+Categories=Network;InstantMessaging;
+Actions=opendir;quit;
+MimeType=x-scheme-handler/discord;
+
+[Desktop Action opendir]
+Name=Open Data Home
+Exec=env PORTABLE_CONF="com.discordapp.Discord" portable --actions opendir
+Icon=go-home-symbolic
+
+
+[Desktop Action quit]
+Name=Quit Discord
+Exec=env PORTABLE_CONF="com.discordapp.Discord" portable --actions quit
+Icon=system-log-out-symbolic

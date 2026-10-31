@@ -1,0 +1,5 @@
+# The application version is pinned by portable-arch; the vendor feed has no stable version.
+[discord-portable]
+source = "regex"
+url = "https://raw.githubusercontent.com/Kraftland/portable-arch/master/x86_64/discord-portable/PKGBUILD"
+regex = "(?m)^pkgver=([^\\n]+)"
