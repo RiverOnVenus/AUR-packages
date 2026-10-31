@@ -2,8 +2,6 @@ name: "Build and Publish"
 
 on:
   push:
-  #schedule:
-  #- cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       packages:
@@ -249,9 +247,8 @@ jobs:
             [ -f zhui-arch.db ] && mv -f zhui-arch.db zhui-arch.db.tar.gz
             [ -f zhui-arch.files ] && mv -f zhui-arch.files zhui-arch.files.tar.gz
 
-            # Never rebuild the database from scratch: an incomplete one would
-            # replace the release database and make the prune step delete every
-            # package asset it does not list.
+            # An incomplete database would replace the release one, and the
+            # prune step would delete every asset it does not list.
             if [ ! -f zhui-arch.db.tar.gz ] || [ ! -f zhui-arch.files.tar.gz ]; then
               echo "::error::could not download the existing database"
               exit 1
@@ -280,7 +277,6 @@ jobs:
           packages=(new/*.pkg.tar.zst)
           changed=0
 
-          # Drop entries for packages that no longer exist in the repository.
           if [ -f zhui-arch.db.tar.gz ]; then
             declare -A current=()
             parsed=1
@@ -340,7 +336,6 @@ jobs:
           fi
           gh release upload zhui-arch --clobber ./zhui-arch.db ./zhui-arch.files
 
-          # Drop assets no longer referenced by the database.
           if ! bsdtar -xOf zhui-arch.db.tar.gz --include='*/desc' |
             awk '/^%FILENAME%$/{getline; print}' | sort > /tmp/keep; then
             echo "refusing to prune: could not read the database" >&2

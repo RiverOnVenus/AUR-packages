@@ -5,7 +5,6 @@ name: "Refresh devel packages"
 # otherwise leave these packages frozen at their last build.
 on:
   schedule:
-    # Weekly on Sunday at 04:00 UTC.
     - cron: "0 4 * * 0"
   workflow_dispatch:
 
@@ -24,7 +23,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           # -bin packages with pkgver() parse the version out of a downloaded
-          # artifact; rebuilding them daily only re-downloads it.
+          # artifact; rebuilding them every run only re-downloads it.
           mapfile -t devel < <(
             for pkgbuild in */PKGBUILD; do
               dir=${pkgbuild%/PKGBUILD}
@@ -44,7 +43,7 @@ jobs:
           printf '  %s\n' "${devel[@]}"
 
           # The Actions API intermittently returns 500; retry instead of
-          # failing the nightly refresh.
+          # failing the refresh.
           for attempt in 1 2 3 4 5; do
             if gh workflow run push_aur.yml -f packages="${devel[*]}"; then
               echo "dispatch accepted on attempt $attempt"
