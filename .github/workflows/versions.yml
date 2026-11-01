@@ -4,9 +4,10 @@ name: "Check upstream versions"
 # keeps a single issue with the results. It never edits packages.
 on:
   schedule:
+    # 12:00 UTC is 20:00 in UTC+8, so a run lands in the evening.
     # Day-of-month stepping means a month boundary can produce two
     # consecutive runs.
-    - cron: "0 4 */2 * *"
+    - cron: "0 12 */2 * *"
   workflow_dispatch:
 
 permissions:
