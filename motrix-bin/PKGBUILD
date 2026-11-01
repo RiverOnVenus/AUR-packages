@@ -3,7 +3,7 @@
 # Contributor: Jack Chen <redchenjs@live.com>
 
 pkgname=motrix-bin
-pkgver=2.1.1
+pkgver=2.2.0
 pkgrel=1
 
 pkgdesc="A full-featured download manager (binary version)"
@@ -13,11 +13,13 @@ license=('MIT')
 
 conflicts=('motrix' 'motrix-git')
 depends=('alsa-lib' 'gtk3' 'libxcb' 'nss')
+optdepends=('libnotify: desktop notifications'
+            'libsecret: store credentials through the keyring')
 changelog="changelog.md"
 
 source=("https://github.com/agalwood/Motrix/releases/download/v${pkgver}/Motrix_${pkgver}_amd64.deb"
         "LICENSE::https://raw.githubusercontent.com/agalwood/Motrix/v${pkgver}/LICENSE")
-sha512sums=('2ec4e6c9fb5370e9f217ab6fa40e76b6549fab2a7d2529f9ab4ea92f3aadc422f3b79c22fdbb7896bdc14b4a6e9a3356518fd1f230cbb340feec144a389f8666'
+sha512sums=('ce00fd50b17e2f8f1f50ba5f0c8ed2f2f8d9423d64b0ed2e8084db199227798c20a3f3dfecc6915cbe2a3a6ac6e53a2969713fe505f97b763026ac2a4fd5cec1'
             '0c5155a42c4a624fe45199e604056a72843ce13550b998cabfdd492557e4bdb4f3736a0772b53017e670b6373c4fb423065d98f58d9d379be626b9024386c95b')
 
 package() {

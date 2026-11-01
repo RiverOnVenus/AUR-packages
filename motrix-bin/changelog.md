@@ -1,166 +1,124 @@
-# Name: Motrix v2.1.1
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.1.1
+# Name: v2.2.0
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.2.0
+### published at '2026-11-01T04:04:40Z' by github-actions[bot]
 ---
-# Motrix 2.1.1
+<!-- snap-publication-status:2.2.0 -->
+> **Snap publication pending:** Desktop downloads, update feeds, and Server images for 2.2.0 are available. Snap Store upload processing failed; `latest/edge`, `latest/candidate`, and `latest/stable` remain on 2.1.1. The Snap 2.2.0 candidate/stable promotions have not run. [Publication run](https://github.com/agalwood/Motrix/actions/runs/41269822859).
+>
+> **Snap 发布尚未完成：** 2.2.0 桌面安装包、更新源及 Server 镜像已可用。Snap Store 上传处理失败，`latest/edge`、`latest/candidate`、`latest/stable` 仍为 2.1.1，尚未执行 Snap 2.2.0 的 candidate/stable 晋级。
+<!-- /snap-publication-status:2.2.0 -->
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/v2.1.1/docs/release-notes/2.1.1.zh-CN.md)
+# Motrix 2.2.0
 
-Motrix 2.1.1 increases the configurable download concurrency and fixes false
-path conflicts during legacy task migration.
+English | [简体中文](https://github.com/agalwood/Motrix/blob/v2.2.0/docs/release-notes/2.2.0.zh-CN.md)
 
-## Changes since 2.1.0
+Motrix 2.2.0 restores optional desktop download progress, enables browser-extension
+media downloads on Server, and improves torrent metadata validation. It also fixes
+browser-profile connections, cookie handoff, speed modes, and Paragon NTFS completion.
 
-- Raise the simultaneous-download setting from 1–100 to **1–200**, keeping
-  the default at **10**. Values above 100 remain intact after saving other
-  settings and restarting the application. Addresses the requested limit
-  increase in [#2439](https://github.com/agalwood/Motrix/issues/2439).
-- Stop treating display names and output hints from unresolved legacy magnet
-  tasks as owned file paths. Multiple magnet tasks can be imported without
-  false path conflicts, and those hints no longer block unrelated HTTP or
-  BitTorrent task activation. Existing-file protections for tasks with actual
-  output ownership remain in place. Fixes
-  [#2437](https://github.com/agalwood/Motrix/issues/2437).
-- Update form resolvers, virtual lists, layout and icon dependencies, along with
-  Biome and pnpm. Update electron-builder to **26.18.1** and electron-updater to
-  **6.8.12**, including fixes for differential-download redirects and cached
-  block maps. `vscode-jsonrpc` remains at **9.0.3**, Electron at **45.1.0**, and
-  the bundled engine at **aria2 1.37.0-motrix.21**.
+## Changes since 2.1.1
+
+- Add an optional download-progress indicator for the macOS Dock and Windows
+  taskbar. Enable it in Appearance; it is off by default. Progress survives
+  lightweight-mode window release and is cleared when transfers finish or the
+  option is disabled. The option is not enabled on Linux or Web.
+- Apply the selected standard or low-speed profile when switching modes, including
+  automatic switching. Empty low-speed fields inherit their corresponding
+  standard values; adaptive limits continue to constrain Automatic mode.
+- Clarify the Downloads **Connections** column: show HTTP connection counts
+  during downloads and BT/magnet peers while downloading, fetching metadata, or
+  seeding, including zero peers. Clear inactive counts and keep blank values
+  last in either sort direction.
+- Enable extension HLS/DASH downloads and separate audio/video merging on Server.
+  FFmpeg detection is refreshed when the extension rescans capabilities, so
+  installing or changing the executable does not require a Server restart.
+  Media segments remain separate from the normal task list and are cancelled
+  before shutdown. The official image does not bundle FFmpeg: provide a compatible
+  executable inside the container and confirm detection in Media Tools.
+- Keep multiple browsers and profiles using the same extension ID connected
+  independently. Downloads, retries, and notifications are routed to the originating
+  installation; Settings shows each profile's status. Existing credentials remain
+  compatible, old-task notification delivery is preserved, and revocation still
+  applies to the extension's authorization group.
+- Filter incompatible, expired, and duplicate browser cookies before engine
+  dispatch while preserving usable credentials and scope. Reject a fully
+  incompatible or oversized cookie jar before task creation. Extension 0.1.22
+  adds the corresponding rejection explanations and safer handling of uncertain
+  submissions.
+- Add backend support for Safari pairing continuity across changing extension
+  Origins, authenticated with a persistent installation key. This requires the
+  matching Safari extension update. A remote legacy pairing whose Origin has
+  already changed needs one explicit code pairing before persistent reconnects
+  become available.
+- Fix completed HTTP/FTP downloads remaining as `.motrix` files on local macOS
+  Paragon NTFS (`ufsd_NTFS`). The existing journaled reservation process now uses
+  stable NTFS volume identity and correct marker caching. This path is restricted
+  to ordinary same-directory suffix removal; it does not extend support to
+  arbitrary NTFS/FUSE drivers, remote mounts, directories, or plugin replacement.
+- Replace `parse-torrent` with **@motrix/torrent 0.1.1** for bounded metadata parsing,
+  original info-hash identity, hybrid validation, and safer file paths. Preserve
+  uploaded bytes and avoid unnecessary full-buffer copies. Hybrid torrents use
+  their v1 swarm. Reject unsupported or identity-changing metadata before engine
+  admission, including Windows device-name aliases. **Pure-v2 downloading and
+  payload verification remain unsupported by the current engine.**
+
+Electron updates to **45.2.1**, alongside form validation, WebSocket,
+internationalization, icon, and TypeScript runtime-helper dependencies.
+`vscode-jsonrpc` remains **9.0.3**, and the bundled engine remains
+**aria2 1.37.0-motrix.21**.
 
 ## Downloads and updates
 
 Desktop packages support macOS 13 or later, Windows 10 or later, and Linux,
 with native x64 and ARM64 builds. No 32-bit desktop packages are provided.
 macOS DMG and ZIP packages are signed and notarized. Windows NSIS installers
-and ZIP archives are unsigned and may trigger SmartScreen; download them from
-the official GitHub Release.
+and ZIP archives are unsigned and may trigger SmartScreen; use the official
+GitHub Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.1.1.
-Flatpak bundles and Native Host companions are separate downloads. Snap builds
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.2.0.
+Flatpak bundles and Native Host companions remain separate downloads. Snap builds
 first reach `latest/edge`; the same verified amd64 and arm64 revisions are then
 promoted through candidate to stable.
 
-Server images use the immutable tags `docker.io/motrixapp/motrix-server:2.1.1`
-and `ghcr.io/agalwood/motrix-server:2.1.1`. After public multi-platform runtime
-verification, the `2.1`, `2`, `stable`, and `latest` aliases advance to this version.
+Server images use the immutable tags `docker.io/motrixapp/motrix-server:2.2.0`
+and `ghcr.io/agalwood/motrix-server:2.2.0`. After public multi-platform runtime
+verification, the `2.2`, `2`, `stable`, and `latest` aliases advance to this version.
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.2.0/docs/docker-server.md).
 
-Back up your profile and download files before upgrading. Users migrating
-from Motrix v1 should follow the
-[migration guide](https://github.com/agalwood/Motrix/blob/v2.1.1/docs/legacy-migration.md)
+Back up your profile and download files before upgrading. Users migrating from
+Motrix v1 should follow the [migration guide](https://github.com/agalwood/Motrix/blob/v2.2.0/docs/legacy-migration.md)
 and retain their original profile and engine database backups.
 
-## Known limitations
+## Companion releases and verification limits
 
-BitTorrent hash checks during restart or recovery still share the download
-concurrency quota. Raising the limit does not add parallel hash checking or
-separate verification scheduling. Tasks that have entered seeding remain
-excluded from the quota with the default `bt-detach-seed-only=true` setting.
+- Chrome/Edge and Firefox Extension 0.1.22 are published separately. Safari 0.1.22
+  is a separate signed-app rollout: the published extension notes still list
+  real Safari restart acceptance as pending. This Motrix release supplies its
+  prerequisite backend support and does not claim that Safari client acceptance
+  or publication has completed. Follow the
+  [extension releases](https://github.com/motrixapp/motrix-extension/releases).
+- Windows taskbar progress has automated platform/lifecycle coverage; native
+  Windows visual acceptance remains incomplete.
+- The authenticated 58pic.com cookie-handoff case has not been manually verified
+  because the site required human verification. The filtering change does not
+  establish that every site-specific authentication problem is resolved.
 
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.1.0...v2.1.1)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.1.1...v2.2.0)
 
 
 ## What's Changed
-* fix(migration): avoid reserving unresolved magnet path hints by @agalwood in https://github.com/agalwood/Motrix/pull/2458
-* fix(settings): raise concurrent download limit to 200 by @agalwood in https://github.com/agalwood/Motrix/pull/2460
-* chore(release): prepare 2.1.1 by @agalwood in https://github.com/agalwood/Motrix/pull/2461
+* fix(bridge): isolate browser extension installations by @agalwood in https://github.com/agalwood/Motrix/pull/2468
+* fix(bridge): sanitize browser cookies before engine dispatch by @agalwood in https://github.com/agalwood/Motrix/pull/2469
+* fix(finalize): support paragon ntfs publication on macos by @TozyZuo in https://github.com/agalwood/Motrix/pull/2464
+* fix(server): enable extension media downloads with live ffmpeg by @agalwood in https://github.com/agalwood/Motrix/pull/2472
+* fix(bridge): authenticate safari installation continuity by @agalwood in https://github.com/agalwood/Motrix/pull/2473
+* feat(downloads): restore dock and taskbar progress and fix speed modes by @agalwood in https://github.com/agalwood/Motrix/pull/2476
+* feat(torrent): replace parse-torrent with @motrix/torrent by @agalwood in https://github.com/agalwood/Motrix/pull/2475
+* fix(downloads): clarify active task connection counts by @agalwood in https://github.com/agalwood/Motrix/pull/2480
+* ci: parallelize validation and scope native package builds by @agalwood in https://github.com/agalwood/Motrix/pull/2481
+* chore(release): prepare 2.2.0 by @agalwood in https://github.com/agalwood/Motrix/pull/2478
 
+## New Contributors
+* @TozyZuo made their first contribution in https://github.com/agalwood/Motrix/pull/2464
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.1.0...v2.1.1
-
-# Name: Motrix v1.8.19 
-### URL: https://github.com/agalwood/Motrix/releases/tag/v1.8.19
-### published at '2023-05-03T07:13:13Z' by agalwood
----
-![release-v1 8 x-banner](https://user-images.githubusercontent.com/1032175/235918777-7063ab93-ff2d-4f4b-a0b5-6a0ef83adc76.png)
-
-## Release Note
-
-* feat: App sidebar adds vibrancy effect on macOS @shatyuka
-* feat: Supports hiding tray icon on macOS @agalwood
-* feat: The download and upload speeds in the basic settings of the preferences support custom input speeds @SammCheese
-* feat: The advanced settings of the preferences support the setting of the RPC listening port @agalwood
-* feat: Show built-in aria2.conf path in advanced settings of preferences @agalwood
-* feat: Add log level settings in advanced settings of preferences @agalwood
-* feat: Release Linux version supporting arm32/arm64 architecture @agalwood
-* feat: Improve preferences, there will be a confirmation prompt when leaving the page without saving the settings @shatyuka
-* feat: Added macOS Universal version, Linux armv7l, arm64 version @agalwood
-* feat: Added Norwegian Bokmal translation @rubjo
-* feat: Added Thai translation @nxanywhere
-* feat: Dutch translation added @nickbouwhuis
-* feat: When the URL input box is not empty when creating a new task, the add task dialog will not be closed by mistake when pressing the Esc key or clicking the mask @shatyuka
-* feat: Support selecting directory from history directory when creating new task @agalwood
-* feat: Support cURL commands with Cookie/Referer information when creating new task @CW-B-W
-* feat: Support adding HTTP authorization request header when creating a new task @RaymondSalim
-* feat: The taskbar shows the overall download progress @shatyuka
-
-* fix: Tray icon display issue in older versions of macOS @shatyuka
-* fix: There are old wrong items in the task details file list, add a switch to download seeds automatically @dicarne
-* fix: The basic settings of the preference settings failed to modify "Automatically download magnet and torrent content" @agalwood
-* fix: Application interface rendering issue under Linux @agalwood
-* fix: Remove the tooltip of tray on macOS @shatyuka
-* fix: Restarting the app twice when saving preferences @agalwood
-* fix: Improved German translation @nickbouwhuis, @MagicLike
-* fix: Improved Persian translation @eshagh79
-* fix: Improved Traditional Chinese translation @tso1158687, @5idereal
-* fix: Improve English translation @nesaku
-* fix: Improved Spanish translation @ez-me
-* fix: Improve Vietnamese translation @CDzungx
-* fix: Improve Korean translation @quiple
-* fix: Parsing issues about Cookie/Referer when creating a new task @CW-B-W
-* fix: Showing apps doesn't restore minimized windows @shatyuka
-* fix: Update overall dependencies, Electron upgrade to version 22 @agalwood
-* fix: The border color is not changed after the task item is selected in dark mode @agalwood
-* fix: App window resizing issue @shatyuka
-* fix: The event processing problem of canceling the update during automatic update @agalwood
-
-* refactor: Optimized aria2.conf default configuration @agalwood
-* refactor: The built-in Aria2 is upgraded to version 1.36, and it is compatible with various system architectures of Windows, macOS, and Linux @agalwood
-* refactor: Improved auto-update progress bar display @agalwood
-
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v1.6.11...v1.8.19
-
-## 更新日志
-
-* 新特性: macOS 版支持隐藏托盘图标 @agalwood
-* 新特性: macOS 版本应用侧边栏增加 vibrancy 效果 @shatyuka
-* 新特性: 偏好设置的基础设置里下载和上传速度支持自定义输入速度 @SammCheese
-* 新特性: 偏好设置的进阶设置支持 RPC 监听端口的设置 @agalwood
-* 新特性: 偏好设置的进阶设置里显示内置的 aria2.conf 路径 @agalwood
-* 新特性: 偏好设置的进阶设置里添加日志级别设置 @agalwood
-* 新特性: 发布支持 arm32/arm64 架构的 Linux 版本 @agalwood
-* 新特性: 改进偏好设置，设置未保存离开页面时会有确认提示 @shatyuka
-* 新特性: 新增 macOS Universal 版本、Linux armv7l、arm64 版本 @agalwood
-* 新特性: 新增挪威博克马尔语翻译 @rubjo
-* 新特性: 新增泰语翻译 @nxanywhere
-* 新特性: 新增荷兰语翻译 @nickbouwhuis
-* 新特性: 新建任务时URL输入框不为空的情况下，按下esc键或点击遮罩时不会误关闭弹层 @shatyuka
-* 新特性: 新建任务时支持从历史目录选择目录 @agalwood
-* 新特性: 新建任务时支持带有 Cookie/Referer 信息的的 cURL 命令 @CW-B-W
-* 新特性: 新建任务时支持添加 HTTP 授权请求头 @RaymondSalim
-* 新特性: 任务栏显示整体下载进度 @shatyuka
-
-* 修复: 在旧版本 macOS 托盘图标的显示问题 @shatyuka
-* 修复: 任务详情文件列表有旧的错误项目，增加自动下载种子的开关 @dicarne
-* 修复: 偏好设置的基础设置修改“自动开始下载磁力链接、种子内的文件”失效的问题 @agalwood
-* 修复: 在 Linux 下 应用界面渲染错误问题 @agalwood
-* 修复: 移除了 macOS 版本托盘图标提示 @shatyuka
-* 修复: 在保存偏好设置时重新启动应用程序两次的问题 @agalwood
-* 修复: 改进德语翻译 @nickbouwhuis, @MagicLike
-* 修复: 改进波斯语翻译 @eshagh79
-* 修复: 改进繁体中文翻译 @tso1158687, @5idereal
-* 修复: 改进英文翻译 @nesaku
-* 修复: 改进西班牙语翻译 @ez-me
-* 修复: 改进越南语翻译 @CDzungx
-* 修复: 改进韩语翻译 @quiple
-* 修复: 新建任务时关于 Cookie/Referer 的解析问题 @CW-B-W
-* 修复: 显示应用时不会还原最小化的窗口 @shatyuka
-* 修复: 更新整体依赖，Electron 升级到 22 版本 @agalwood
-* 修复: 深色模式下任务项选定之后边框颜色不显示的问题 @agalwood
-* 修复: 应用窗口大小调整问题 @shatyuka
-* 修复: 自动更新时取消更新的事件处理问题 @agalwood
-
-* 重构: 优化了 aria2.conf 默认配置 @agalwood
-* 重构: 内置的 Aria2 升级为 1.36 版本，并适配了 Windows、macOS、Linux 多种系统架构 @agalwood
-* 重构: 改善了自动更新进度条显示 @agalwood
-
-**完整变更日志**: https://github.com/agalwood/Motrix/compare/v1.6.11...v1.8.19
-
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.1.1...v2.2.0
