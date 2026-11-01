@@ -3,7 +3,7 @@
 
 pkgname=alma-desktop-bin
 pkgver=0.4.337
-pkgrel=2
+pkgrel=3
 pkgdesc='AI provider orchestration desktop app'
 arch=('x86_64')
 url='https://alma.now'
@@ -44,9 +44,9 @@ optdepends=(
   'java-runtime: run Java-based MCP servers'
   'nodejs: run Node.js-based MCP servers'
   'python: run Python-based MCP servers'
-  'python-gobject: Linux remote screen via xdg-desktop-portal'
-  'gst-plugin-pipewire: stream the screen over PipeWire'
-  'gst-plugins-good: JPEG encode screen frames (lower CPU)'
+  'python-gobject: required for Linux remote screen (xdg-desktop-portal)'
+  'gst-plugin-pipewire: required for Linux remote screen streaming'
+  'gst-plugins-good: faster JPEG encoding for the remote screen'
 )
 provides=('alma-desktop')
 conflicts=('alma-appimage')
