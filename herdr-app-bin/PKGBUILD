@@ -1,0 +1,44 @@
+# Maintainer: Qingxu <me@linioi.com>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=herdr-app-bin
+pkgver=0.1.12
+pkgrel=1
+pkgdesc='Native desktop workspace for terminals and coding agents that keep running'
+arch=('x86_64' 'aarch64')
+url='https://herdr.dev'
+license=('Apache-2.0')
+depends=('gcc-libs'
+         'glibc'
+         'hicolor-icon-theme'
+         'fontconfig'
+         'freetype2'
+         'libglvnd'
+         'libxcb'
+         'libxkbcommon'
+         'libxkbcommon-x11'
+         'wayland'
+         'vulkan-icd-loader'
+         'herdr-core>=0.1.11')
+optdepends=('vulkan-radeon: Vulkan driver for AMD GPUs'
+            'vulkan-intel: Vulkan driver for Intel GPUs'
+            'nvidia-utils: Vulkan driver for NVIDIA GPUs'
+            'vulkan-swrast: software Vulkan fallback')
+provides=("herdr-app=$pkgver")
+conflicts=('herdr-app' 'herdr-app-desktop-bin')
+source=("${pkgname%-bin}.desktop")
+# Literal arch names, not $CARCH: .SRCINFO is generated on one host but must
+# carry the real asset URL for both architectures.
+source_x86_64=("${pkgname%-bin}-${pkgver}-x86_64.tar.gz::https://releases.herdr.dev/app/${pkgver}/herdr-app-linux-x86_64.tar.gz")
+source_aarch64=("${pkgname%-bin}-${pkgver}-aarch64.tar.gz::https://releases.herdr.dev/app/${pkgver}/herdr-app-linux-aarch64.tar.gz")
+sha256sums=('2cc1199525a1bac6364a7397363f96a00db3faaf51aea049f9d4a7f694ef885a')
+sha256sums_x86_64=('a265e6c925c487458406741ffa09d2fa0d3d4bd401a34ed8c01c336108e57c1f')
+sha256sums_aarch64=('749f31d30e3f4d7e24e2748f74d9cb4a9bdda4c968027abaffb6fb239ffeb694')
+
+package() {
+  install -Dm755 "$srcdir/herdr-app/herdr-app" "$pkgdir/usr/bin/herdr-app"
+  install -Dm644 "$srcdir/herdr-app/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "$srcdir/herdr-app/THIRD-PARTY-NOTICES" "$pkgdir/usr/share/licenses/$pkgname/THIRD-PARTY-NOTICES"
+  install -Dm644 "$srcdir/herdr-app/herdr-app.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/herdr-app.svg"
+  install -Dm644 "$srcdir/herdr-app.desktop" "$pkgdir/usr/share/applications/herdr-app.desktop"
+}

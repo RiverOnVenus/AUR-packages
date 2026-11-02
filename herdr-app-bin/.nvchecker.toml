@@ -1,0 +1,4 @@
+[herdr-app-bin]
+source = "regex"
+url = "https://releases.herdr.dev/app/latest.json"
+regex = '"version"\s*:\s*"([0-9.]+)"'
