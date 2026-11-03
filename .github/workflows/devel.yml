@@ -5,8 +5,8 @@ name: "Refresh devel packages"
 # otherwise leave these packages frozen at their last build.
 on:
   schedule:
-    # 04:00 UTC is 12:00 in UTC+8, so the weekly refresh lands at midday.
-    - cron: "0 4 * * 0"
+    # 12:00 UTC is 20:00 in UTC+8, so the refresh lands in the evening.
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
