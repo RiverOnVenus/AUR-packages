@@ -2,6 +2,7 @@ name: "Build and Publish"
 
 on:
   push:
+    branches: [master]
   workflow_dispatch:
     inputs:
       packages:
@@ -30,12 +31,30 @@ jobs:
           BEFORE: ${{ github.event.before }}
           REQUESTED: ${{ github.event.inputs.packages }}
         run: |
-          parse_aur() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
+          parse_aur() { sed -e 's/^[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
           mapfile -t aur < <(parse_aur < aur-packages.txt)
+          for p in "${aur[@]}"; do
+            if [ ! -f "$p/PKGBUILD" ]; then
+              echo "::error::aur-packages.txt entry has no PKGBUILD: $p"
+              exit 1
+            fi
+          done
 
           candidates=()
           if [ "$EVENT" = "workflow_dispatch" ] && [ -n "$REQUESTED" ]; then
             read -r -a candidates <<< "$REQUESTED"
+            for p in "${candidates[@]}"; do
+              case "$p" in
+                */*|.|..)
+                  echo "::error::invalid requested package: $p"
+                  exit 1
+                  ;;
+              esac
+              if [ ! -f "$p/PKGBUILD" ]; then
+                echo "::error::requested package has no PKGBUILD: $p"
+                exit 1
+              fi
+            done
           elif [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
             mapfile -t changed < <(git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -v '/\.nvchecker\.toml$' || true)
             mapfile -t dirs < <(printf '%s\n' "${changed[@]}" | cut -d/ -f1 | sort -u)
@@ -79,6 +98,7 @@ jobs:
   preflight:
     runs-on: ubuntu-latest
     needs: generate-matrix
+    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
 
@@ -92,7 +112,7 @@ jobs:
       - name: Verify AUR maintainership
         run: |
           set -o pipefail
-          parse_aur() { sed -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
+          parse_aur() { sed -e 's/^[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
           mapfile -t listed < <(parse_aur < aur-packages.txt)
 
           # list-repos prints one package base per line, with a leading space.
@@ -134,7 +154,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: [generate-matrix, preflight]
-    if: needs.generate-matrix.outputs.count != '0'
+    if: github.ref == 'refs/heads/master' && needs.generate-matrix.outputs.count != '0'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
@@ -214,7 +234,8 @@ jobs:
     needs: [generate-matrix, build]
     # Run even when some or all builds failed, and when nothing was built at
     # all, so deletions and whitelist changes are still reconciled.
-    if: always() && !cancelled() && needs.generate-matrix.result == 'success'
+    if: always() && !cancelled() && github.ref == 'refs/heads/master' &&
+      needs.generate-matrix.result == 'success'
     container: archlinux:base-devel
     permissions:
       contents: write
