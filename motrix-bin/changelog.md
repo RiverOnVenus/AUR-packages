@@ -1,124 +1,93 @@
-# Name: v2.2.0
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.2.0
-### published at '2026-11-01T04:04:40Z' by github-actions[bot]
+# Name: v2.2.1
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.2.1
+### published at '2026-11-03T04:44:35Z' by github-actions[bot]
 ---
-<!-- snap-publication-status:2.2.0 -->
-> **Snap publication pending:** Desktop downloads, update feeds, and Server images for 2.2.0 are available. Snap Store upload processing failed; `latest/edge`, `latest/candidate`, and `latest/stable` remain on 2.1.1. The Snap 2.2.0 candidate/stable promotions have not run. [Publication run](https://github.com/agalwood/Motrix/actions/runs/41269822859).
->
-> **Snap 发布尚未完成：** 2.2.0 桌面安装包、更新源及 Server 镜像已可用。Snap Store 上传处理失败，`latest/edge`、`latest/candidate`、`latest/stable` 仍为 2.1.1，尚未执行 Snap 2.2.0 的 candidate/stable 晋级。
-<!-- /snap-publication-status:2.2.0 -->
+# Motrix 2.2.1
 
-# Motrix 2.2.0
+English | [简体中文](https://github.com/agalwood/Motrix/blob/v2.2.1/docs/release-notes/2.2.1.zh-CN.md)
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/v2.2.0/docs/release-notes/2.2.0.zh-CN.md)
+Motrix 2.2.1 fixes startup recovery for broken magnet sessions and HTTP retries
+that previously lost their original request context or download progress.
 
-Motrix 2.2.0 restores optional desktop download progress, enables browser-extension
-media downloads on Server, and improves torrent metadata validation. It also fixes
-browser-profile connections, cookie handoff, speed modes, and Paragon NTFS completion.
+## Changes since 2.2.0
 
-## Changes since 2.1.1
+- Keep a magnet task with missing torrent metadata or a deleted download directory
+  from blocking engine startup. Recover from hash-verified application metadata
+  where possible; otherwise, back up the engine database and retain the affected
+  task as a removable error. Healthy tasks can start, repeated launches do not
+  recreate deleted directories, and unrelated task history is preserved. Also
+  prevent verified old metadata history from reappearing as an extra HTTP task.
+- Retry eligible failed HTTP downloads using the original task, engine GID,
+  output path, request options, cookies and checkpoint. Retain the required engine
+  context across restarts, including explicitly empty cookie jars. The engine
+  checks the original resource identity before reusing partial data; credentials
+  stay in the engine and are not copied into application task records. Restored
+  failures still require an explicit Retry. Alt+Retry keeps the form for editing
+  a new download request.
+- Discard pending Retry availability responses after Web UI logout,
+  reauthentication, or loss of connection readiness, so an old response cannot
+  reopen a cleared dialog or dispatch a previous retry request.
+- Update the packaged engine to **aria2 1.37.0-motrix.22**, including the HTTP
+  continuation contract and stricter handling of malformed torrent piece lengths
+  and empty input-file lines. Native packaging checks exercise real-engine
+  continuation and session recovery on all six desktop targets.
+- Carry forward the Snap publication recovery fixes: verify and reuse accepted
+  package hashes, preserve each architecture’s revision independently, and
+  release only the complete verified build set.
 
-- Add an optional download-progress indicator for the macOS Dock and Windows
-  taskbar. Enable it in Appearance; it is off by default. Progress survives
-  lightweight-mode window release and is cleared when transfers finish or the
-  option is disabled. The option is not enabled on Linux or Web.
-- Apply the selected standard or low-speed profile when switching modes, including
-  automatic switching. Empty low-speed fields inherit their corresponding
-  standard values; adaptive limits continue to constrain Automatic mode.
-- Clarify the Downloads **Connections** column: show HTTP connection counts
-  during downloads and BT/magnet peers while downloading, fetching metadata, or
-  seeding, including zero peers. Clear inactive counts and keep blank values
-  last in either sort direction.
-- Enable extension HLS/DASH downloads and separate audio/video merging on Server.
-  FFmpeg detection is refreshed when the extension rescans capabilities, so
-  installing or changing the executable does not require a Server restart.
-  Media segments remain separate from the normal task list and are cancelled
-  before shutdown. The official image does not bundle FFmpeg: provide a compatible
-  executable inside the container and confirm detection in Media Tools.
-- Keep multiple browsers and profiles using the same extension ID connected
-  independently. Downloads, retries, and notifications are routed to the originating
-  installation; Settings shows each profile's status. Existing credentials remain
-  compatible, old-task notification delivery is preserved, and revocation still
-  applies to the extension's authorization group.
-- Filter incompatible, expired, and duplicate browser cookies before engine
-  dispatch while preserving usable credentials and scope. Reject a fully
-  incompatible or oversized cookie jar before task creation. Extension 0.1.22
-  adds the corresponding rejection explanations and safer handling of uncertain
-  submissions.
-- Add backend support for Safari pairing continuity across changing extension
-  Origins, authenticated with a persistent installation key. This requires the
-  matching Safari extension update. A remote legacy pairing whose Origin has
-  already changed needs one explicit code pairing before persistent reconnects
-  become available.
-- Fix completed HTTP/FTP downloads remaining as `.motrix` files on local macOS
-  Paragon NTFS (`ufsd_NTFS`). The existing journaled reservation process now uses
-  stable NTFS volume identity and correct marker caching. This path is restricted
-  to ordinary same-directory suffix removal; it does not extend support to
-  arbitrary NTFS/FUSE drivers, remote mounts, directories, or plugin replacement.
-- Replace `parse-torrent` with **@motrix/torrent 0.1.1** for bounded metadata parsing,
-  original info-hash identity, hybrid validation, and safer file paths. Preserve
-  uploaded bytes and avoid unnecessary full-buffer copies. Hybrid torrents use
-  their v1 swarm. Reject unsupported or identity-changing metadata before engine
-  admission, including Windows device-name aliases. **Pure-v2 downloading and
-  payload verification remain unsupported by the current engine.**
+Electron remains **45.2.1** and `vscode-jsonrpc` remains **9.0.3**.
 
-Electron updates to **45.2.1**, alongside form validation, WebSocket,
-internationalization, icon, and TypeScript runtime-helper dependencies.
-`vscode-jsonrpc` remains **9.0.3**, and the bundled engine remains
-**aria2 1.37.0-motrix.21**.
+## Upgrade and retry compatibility
+
+**Back up your profile and download files before upgrading.** The new engine
+upgrades its SQLite database to **schema 6**, preserving a complete pre-upgrade
+backup, including committed WAL data. Older engines cannot open schema 6. If a
+downgrade is necessary, stop all engines and restore a verified pre-upgrade backup
+to a separate path; do not delete or reset the upgraded database. Keep backups
+from earlier upgrades as well.
+
+Original-task HTTP continuation requires SQLite persistence, a supporting engine,
+and historical request/resource context captured for that task. Previously deleted
+cookies or missing historical validators cannot be reconstructed. Older tasks and
+custom engines without the required capability may still use the existing
+fresh-download parameter form. Changed or unverifiable resources are not silently
+resumed with old partial bytes. This release does not claim to resolve every
+site-specific authentication failure; [#2426](https://github.com/agalwood/Motrix/issues/2426)
+and [#2488](https://github.com/agalwood/Motrix/issues/2488) remain open for user verification.
+
+Users migrating from Motrix v1 should follow the
+[migration guide](https://github.com/agalwood/Motrix/blob/v2.2.1/docs/legacy-migration.md)
+and retain the original profile and engine database backups.
 
 ## Downloads and updates
 
-Desktop packages support macOS 13 or later, Windows 10 or later, and Linux,
-with native x64 and ARM64 builds. No 32-bit desktop packages are provided.
-macOS DMG and ZIP packages are signed and notarized. Windows NSIS installers
-and ZIP archives are unsigned and may trigger SmartScreen; use the official
-GitHub Release downloads.
+Desktop packages support macOS 13 or later, Windows 10 or later, and Linux, with
+native x64 and ARM64 builds. No 32-bit desktop packages are provided. Official
+macOS packages require signing and notarization. Windows NSIS installers and ZIP
+archives are unsigned and may trigger SmartScreen; use official Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.2.0.
-Flatpak bundles and Native Host companions remain separate downloads. Snap builds
-first reach `latest/edge`; the same verified amd64 and arm64 revisions are then
-promoted through candidate to stable.
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.2.1.
+Flatpak bundles and Native Host companions remain separate downloads. Snap
+availability requires verified Store publication to edge and promotion of the
+same amd64/arm64 revisions through candidate to stable.
 
-Server images use the immutable tags `docker.io/motrixapp/motrix-server:2.2.0`
-and `ghcr.io/agalwood/motrix-server:2.2.0`. After public multi-platform runtime
-verification, the `2.2`, `2`, `stable`, and `latest` aliases advance to this version.
-See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.2.0/docs/docker-server.md).
+Server images use `docker.io/motrixapp/motrix-server:2.2.1` and
+`ghcr.io/agalwood/motrix-server:2.2.1`. After public multi-platform runtime
+verification, `2.2`, `2`, `stable`, and `latest` advance to the same verified digest.
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.2.1/docs/docker-server.md).
 
-Back up your profile and download files before upgrading. Users migrating from
-Motrix v1 should follow the [migration guide](https://github.com/agalwood/Motrix/blob/v2.2.0/docs/legacy-migration.md)
-and retain their original profile and engine database backups.
-
-## Companion releases and verification limits
-
-- Chrome/Edge and Firefox Extension 0.1.22 are published separately. Safari 0.1.22
-  is a separate signed-app rollout: the published extension notes still list
-  real Safari restart acceptance as pending. This Motrix release supplies its
-  prerequisite backend support and does not claim that Safari client acceptance
-  or publication has completed. Follow the
-  [extension releases](https://github.com/motrixapp/motrix-extension/releases).
-- Windows taskbar progress has automated platform/lifecycle coverage; native
-  Windows visual acceptance remains incomplete.
-- The authenticated 58pic.com cookie-handoff case has not been manually verified
-  because the site required human verification. The filtering change does not
-  establish that every site-specific authentication problem is resolved.
-
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.1.1...v2.2.0)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.2.0...v2.2.1)
 
 
 ## What's Changed
-* fix(bridge): isolate browser extension installations by @agalwood in https://github.com/agalwood/Motrix/pull/2468
-* fix(bridge): sanitize browser cookies before engine dispatch by @agalwood in https://github.com/agalwood/Motrix/pull/2469
-* fix(finalize): support paragon ntfs publication on macos by @TozyZuo in https://github.com/agalwood/Motrix/pull/2464
-* fix(server): enable extension media downloads with live ffmpeg by @agalwood in https://github.com/agalwood/Motrix/pull/2472
-* fix(bridge): authenticate safari installation continuity by @agalwood in https://github.com/agalwood/Motrix/pull/2473
-* feat(downloads): restore dock and taskbar progress and fix speed modes by @agalwood in https://github.com/agalwood/Motrix/pull/2476
-* feat(torrent): replace parse-torrent with @motrix/torrent by @agalwood in https://github.com/agalwood/Motrix/pull/2475
-* fix(downloads): clarify active task connection counts by @agalwood in https://github.com/agalwood/Motrix/pull/2480
-* ci: parallelize validation and scope native package builds by @agalwood in https://github.com/agalwood/Motrix/pull/2481
-* chore(release): prepare 2.2.0 by @agalwood in https://github.com/agalwood/Motrix/pull/2478
+* ci(snap): recover uploads from verified tag artifacts by @agalwood in https://github.com/agalwood/Motrix/pull/2483
+* fix(snap): initialize the store client with persistent auth by @agalwood in https://github.com/agalwood/Motrix/pull/2484
+* fix(snap): isolate publication architecture from snap runtime by @agalwood in https://github.com/agalwood/Motrix/pull/2485
+* fix(engine): isolate unrecoverable magnet sessions on startup by @agalwood in https://github.com/agalwood/Motrix/pull/2486
+* fix(downloads): continue retained http tasks through the engine by @agalwood in https://github.com/agalwood/Motrix/pull/2489
+* fix(downloads): discard retry queries after session changes by @agalwood in https://github.com/agalwood/Motrix/pull/2490
+* fix(engine): bundle aria2 motrix.22 with safe session recovery by @agalwood in https://github.com/agalwood/Motrix/pull/2491
+* chore(release): prepare 2.2.1 by @agalwood in https://github.com/agalwood/Motrix/pull/2493
 
-## New Contributors
-* @TozyZuo made their first contribution in https://github.com/agalwood/Motrix/pull/2464
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.1.1...v2.2.0
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.2.0...v2.2.1
