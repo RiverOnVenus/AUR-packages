@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=alma-desktop-bin
-pkgver=0.4.422
+pkgver=0.4.439
 pkgrel=1
 pkgdesc='AI provider orchestration desktop app'
 arch=('x86_64')
@@ -51,7 +51,7 @@ optdepends=(
 provides=('alma-desktop')
 conflicts=('alma-appimage')
 source=("https://github.com/yetone/alma-releases/releases/download/v${pkgver}/alma-${pkgver}-linux-amd64.deb")
-sha256sums=('b5fd4f905b3b0a6f1c220ba7ed05609ee9ed5591dba0feed5d737eab48c1de69')
+sha256sums=('af10588b2d8509bec433351543719aedf680c1a9c4acf995b85af06921744492')
 
 prepare() {
   bsdtar -xf "${srcdir}/alma-${pkgver}-linux-amd64.deb" -C "${srcdir}" data.tar.xz
