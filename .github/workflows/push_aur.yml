@@ -203,35 +203,47 @@ jobs:
     # Runs upstream build code, so this job must never hold the AUR SSH key.
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-      - name: Check PKGBUILD
-        id: build-test
+      - name: Build package
         env:
+          PKG: ${{ matrix.name }}
           # Standard GitHub runners have 4 vCPUs and makepkg defaults to
           # serial builds; this also applies to dependencies built by paru.
           MAKEFLAGS: "-j4"
           # The container's makepkg.conf leaves PACKAGER commented out, which
           # would record every package as "Unknown Packager".
           PACKAGER: "RiverOnVenus <aur@zhui.dev>"
-        # Pinned to master as of 2026-10; bump deliberately.
-        uses: ouuan/pkgbuild-action@7ccfe89be1c82ac90fe444ab70c1a3b9397f5894
-        with:
-          path: ${{ matrix.name }}
-
-      - name: Handle epoch
-        id: epoch
+        # Only the package directory and the script are mounted: no checkout,
+        # no token and no Docker socket reach the build.
         run: |
-          oldname="${{ steps.build-test.outputs.pkgfile }}"
-          newname="$(echo "$oldname" | sed -e 's/[^A-Za-z0-9._-]/_/g')"
-          if [[ "$oldname" != "$newname" ]]; then
-            mv "$oldname" "$newname"
-          fi
-          echo "pkgfile=$newname" >> "$GITHUB_OUTPUT"
+          mkdir out
+          docker run --rm \
+            -e MAKEFLAGS -e PACKAGER \
+            -v "$PWD/$PKG:/src:ro" \
+            -v "$PWD/.github/scripts/build-package.sh:/build-package.sh:ro" \
+            -v "$PWD/out:/out" \
+            archlinux:base-devel bash /build-package.sh /src /out
+
+          # Build code runs as root in the container and could leave a symlink
+          # to a runner file here; the artifact upload would follow it.
+          find out -mindepth 1 ! -type f -print -delete
+
+          # Artifact names cannot contain ':', which an epoch puts in the file
+          # name. Release assets get the same name.
+          for f in out/*; do
+            name=$(basename "$f")
+            safe=$(sed -e 's/[^A-Za-z0-9._-]/_/g' <<< "$name")
+            [ "$name" = "$safe" ] || mv "$f" "out/$safe"
+          done
+          ls -l out
 
       - uses: actions/upload-artifact@v4
         with:
           name: pkg-${{ matrix.name }}
-          path: ${{ steps.epoch.outputs.pkgfile }}
+          path: out/*.pkg.tar.zst
+          if-no-files-found: error
           retention-days: 3
 
   push-aur:
@@ -328,6 +340,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The reconcile step sources every PKGBUILD.
+          persist-credentials: false
 
       - uses: actions/download-artifact@v4
         continue-on-error: true
