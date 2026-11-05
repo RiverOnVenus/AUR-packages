@@ -20,6 +20,9 @@ concurrency:
 jobs:
   generate-matrix:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,8 +31,8 @@ jobs:
         id: gen-matrix
         env:
           EVENT: ${{ github.event_name }}
-          BEFORE: ${{ github.event.before }}
           REQUESTED: ${{ github.event.inputs.packages }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           parse_aur() { sed -e 's/^[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
           mapfile -t aur < <(parse_aur < aur-packages.txt)
@@ -39,6 +42,31 @@ jobs:
               exit 1
             fi
           done
+
+          # Diff against the last fully successful push rather than this push's
+          # parent: a pending run replaced in the concurrency queue, a failed
+          # build or an AUR outage is then retried by the next push.
+          base=""
+          scope=all
+          if [ "$EVENT" = "push" ]; then
+            if ! base=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/push_aur.yml/runs?branch=master&event=push&status=success&per_page=1" \
+              --jq '.workflow_runs[0].head_sha // empty'); then
+              echo "::error::could not read the last successful run"
+              exit 1
+            fi
+            if [ -z "$base" ]; then
+              echo "no successful push run found, building everything"
+            elif git merge-base --is-ancestor "$base" "$GITHUB_SHA"; then
+              echo "diffing against last successful push: $base"
+              scope=diff
+            elif git merge-base --is-ancestor "$GITHUB_SHA" "$base"; then
+              # Re-running an old run must not publish its older tree.
+              echo "$GITHUB_SHA is older than the last successful push $base, nothing to do"
+              scope=none
+            else
+              echo "last successful push $base is not in this history, building everything"
+            fi
+          fi
 
           candidates=()
           if [ "$EVENT" = "workflow_dispatch" ] && [ -n "$REQUESTED" ]; then
@@ -55,14 +83,16 @@ jobs:
                 exit 1
               fi
             done
-          elif [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            mapfile -t changed < <(git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -v '/\.nvchecker\.toml$' || true)
+          elif [ "$scope" = "none" ]; then
+            :
+          elif [ "$scope" = "diff" ]; then
+            mapfile -t changed < <(git diff --name-only "$base" "$GITHUB_SHA" | grep -v '/\.nvchecker\.toml$' || true)
             mapfile -t dirs < <(printf '%s\n' "${changed[@]}" | cut -d/ -f1 | sort -u)
             # A push that only edits the whitelist must still build the packages
             # it added, otherwise they never reach the AUR.
             added=()
             if printf '%s\n' "${changed[@]}" | grep -qx 'aur-packages.txt'; then
-              mapfile -t old_aur < <(git show "$BEFORE:aur-packages.txt" 2>/dev/null | parse_aur || true)
+              mapfile -t old_aur < <(git show "$base:aur-packages.txt" 2>/dev/null | parse_aur || true)
               mapfile -t added < <(comm -13 <(printf '%s\n' "${old_aur[@]}" | sort -u) <(printf '%s\n' "${aur[@]}" | sort -u))
             fi
             mapfile -t candidates < <(
@@ -75,30 +105,41 @@ jobs:
             mapfile -t candidates < <(find . -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | sort)
           fi
 
-          include=()
+          build=()
+          push=()
           for p in "${candidates[@]}"; do
             [ -f "$p/PKGBUILD" ] || continue
+            build+=("$p")
             if printf '%s\n' "${aur[@]}" | grep -qxF "$p"; then
-              include+=("{\"name\":\"$p\",\"aur\":true}")
-            else
-              include+=("{\"name\":\"$p\",\"aur\":false}")
+              push+=("$p")
             fi
           done
 
-          echo "count=${#include[@]}" >> "$GITHUB_OUTPUT"
-          if [ ${#include[@]} -gt 0 ]; then
-            echo "matrix=$(printf '%s\n' "${include[@]}" | jq -cs '{include: .}')" >> "$GITHUB_OUTPUT"
-          else
-            echo 'matrix={"include":[]}' >> "$GITHUB_OUTPUT"
-          fi
+          to_matrix() {
+            if [ $# -gt 0 ]; then
+              printf '%s\n' "$@" | jq -R '{name: .}' | jq -cs '{include: .}'
+            else
+              echo '{"include":[]}'
+            fi
+          }
+          {
+            echo "count=${#build[@]}"
+            echo "matrix=$(to_matrix "${build[@]}")"
+            echo "aur_count=${#push[@]}"
+            echo "aur_matrix=$(to_matrix "${push[@]}")"
+          } >> "$GITHUB_OUTPUT"
     outputs:
       matrix: ${{ steps.gen-matrix.outputs.matrix }}
       count: ${{ steps.gen-matrix.outputs.count }}
+      aur_matrix: ${{ steps.gen-matrix.outputs.aur_matrix }}
+      aur_count: ${{ steps.gen-matrix.outputs.aur_count }}
 
   preflight:
     runs-on: ubuntu-latest
     needs: generate-matrix
-    if: github.ref == 'refs/heads/master'
+    # Only pushes to the AUR depend on it, so an AUR outage cannot hold up
+    # packages that are served from the personal repository alone.
+    if: github.ref == 'refs/heads/master' && needs.generate-matrix.outputs.aur_count != '0'
     steps:
       - uses: actions/checkout@v4
 
@@ -153,16 +194,15 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: [generate-matrix, preflight]
+    needs: generate-matrix
     if: github.ref == 'refs/heads/master' && needs.generate-matrix.outputs.count != '0'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
 
+    # Runs upstream build code, so this job must never hold the AUR SSH key.
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Check PKGBUILD
         id: build-test
@@ -194,8 +234,55 @@ jobs:
           path: ${{ steps.epoch.outputs.pkgfile }}
           retention-days: 3
 
+  push-aur:
+    runs-on: ubuntu-latest
+    needs: [generate-matrix, preflight, build]
+    # Runs on its own VM, away from build code. Builds may fail individually, so
+    # each package checks its own result below.
+    if: always() && !cancelled() && github.ref == 'refs/heads/master' &&
+      needs.generate-matrix.outputs.aur_count != '0' &&
+      needs.preflight.result == 'success'
+    permissions:
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.aur_matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The commit message comes from this package's history.
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check build result
+        id: built
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PKG: ${{ matrix.name }}
+        run: |
+          total=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=pkg-$PKG" --jq '.total_count')
+          if [ "$total" -gt 0 ]; then
+            echo "ok=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "$PKG did not build, not pushing it"
+          fi
+
+      # Taken from the committed PKGBUILD without running pkgver(), so a VCS
+      # package only reaches the AUR when its packaging changes. This sources
+      # the PKGBUILD, so it has to stay ahead of the SSH key.
+      - name: Generate .SRCINFO
+        if: steps.built.outputs.ok == '1'
+        env:
+          PKG: ${{ matrix.name }}
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+            -v "$PWD/$PKG:/pkg" -w /pkg archlinux:base-devel \
+            sh -c 'makepkg --printsrcinfo > .SRCINFO'
+
       - name: Install SSH key
-        if: matrix.aur
+        if: steps.built.outputs.ok == '1'
         # Pinned to v2 as of 2026-10; bump deliberately.
         uses: shimataro/ssh-key-action@87a8f067114a8ce263df83e9ed5c849953548bc3
         with:
@@ -203,7 +290,7 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
 
       - name: Clone AUR and update
-        if: matrix.aur
+        if: steps.built.outputs.ok == '1'
         run: |
           message="$(git log -n1 --pretty='%B' "${{ matrix.name }}")"
           git clone ssh://aur@aur.archlinux.org/${{ matrix.name }}.git ../aur
