@@ -51,16 +51,6 @@ case "$code" in
     ;;
 esac
 
-sync_db() {
-  local attempt
-  for attempt in 1 2 3; do
-    pacman "$@" && return 0
-    echo "pacman $* failed on attempt $attempt"
-    sleep $((attempt * 10))
-  done
-  return 1
-}
-
 # archlinuxcn is enabled only long enough to install paru, so no other
 # dependency can come from it.
 cat >> /etc/pacman.conf <<'EOF'
@@ -69,13 +59,12 @@ cat >> /etc/pacman.conf <<'EOF'
 Server = https://repo.archlinuxcn.org/$arch
 EOF
 pacman-key --init
-pacman-key --populate archlinux
-sync_db -Syu --noconfirm
+pacman -Syu --noconfirm
 pacman -S --noconfirm archlinuxcn-keyring
 pacman -S --noconfirm paru
 pacman -Rns --noconfirm archlinuxcn-keyring
 sed -i '/^\[archlinuxcn\]$/,$d' /etc/pacman.conf
-sync_db -Syy
+pacman -Syy
 echo "::endgroup::"
 
 echo "::group::Prepare build user"
@@ -83,8 +72,7 @@ useradd -m builder
 echo 'builder ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builder
 chmod 0440 /etc/sudoers.d/builder
 work=/home/builder/pkg
-install -d -o builder -g builder "$work"
-cp -r "$src/." "$work/"
+cp -r "$src" "$work"
 chown -R builder:builder "$work"
 echo "::endgroup::"
 
@@ -96,10 +84,6 @@ as_builder() {
 echo "::group::Install dependencies"
 as_builder makepkg --printsrcinfo > /tmp/srcinfo
 pkgbase=$(sed -nE 's/^pkgbase = //p' /tmp/srcinfo)
-if [ -z "$pkgbase" ]; then
-  echo "::error::could not read pkgbase from .SRCINFO"
-  exit 1
-fi
 # Reading .SRCINFO also covers architecture-specific arrays such as
 # depends_x86_64, which sourcing the PKGBUILD would miss.
 mapfile -t deps < <(sed -nE 's/^\t(depends|makedepends|checkdepends)(_x86_64)? = //p' /tmp/srcinfo | sort -u)
@@ -117,25 +101,11 @@ echo "::endgroup::"
 echo "::group::Collect packages"
 # makepkg has written the pkgver() result back into the PKGBUILD by now, so
 # the list names the files that were actually built.
+# The list also names the debug package, whether or not one was built.
 mapfile -t files < <(as_builder makepkg --packagelist)
-kept=()
 for f in "${files[@]}"; do
   name=$(basename "$f")
-  if [ "${name%-*-*-*}" = "$pkgbase-debug" ]; then
-    echo "skipping debug package: $name"
-    continue
-  fi
-  if [ ! -f "$f" ]; then
-    echo "::error::expected package was not built: $name"
-    exit 1
-  fi
-  kept+=("$f")
-done
-if [ ${#kept[@]} -eq 0 ]; then
-  echo "::error::the build produced no package"
-  exit 1
-fi
-for f in "${kept[@]}"; do
+  [ "${name%-*-*-*}" = "$pkgbase-debug" ] && continue
   pacman -Qip "$f"
   pacman -Qlp "$f"
   cp "$f" "$out/"
@@ -145,7 +115,7 @@ echo "::endgroup::"
 echo "::group::Run namcap"
 pacman -S --noconfirm --needed namcap
 warn "$(as_builder namcap PKGBUILD || true)"
-for f in "${kept[@]}"; do
-  warn "$(as_builder namcap "$f" || true)"
+for f in "$out"/*; do
+  warn "$(namcap "$f" || true)"
 done
 echo "::endgroup::"

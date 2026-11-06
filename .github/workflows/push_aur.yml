@@ -316,16 +316,9 @@ jobs:
           git config user.name "GitHub Action"
           git config user.email "action@github.com"
           git add -A
-          escape() {
-            local content="$1"
-            content="${content//'%'/'%25'}"
-            content="${content//$'\n'/'%0A'}"
-            content="${content//$'\r'/'%0D'}"
-            echo "$content"
-          }
           git diff-index @ --exit-code --quiet || ( git commit -m "Update from GitHub Actions: $message
 
-          https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" && echo "::warning::Pushed to AUR:%0A$(escape "$message")" )
+          https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" && echo "::notice::pushed ${{ matrix.name }} to the AUR" )
           git push
 
   publish-repo:
@@ -361,9 +354,6 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -o pipefail
-          mkdir -p new
-          shopt -s nullglob
-          packages=(new/*.pkg.tar.zst)
           if gh release view zhui-arch >/dev/null 2>&1; then
             echo "exists=1" >> "$GITHUB_OUTPUT"
             gh release download zhui-arch -p 'zhui-arch.db' -p 'zhui-arch.files' -D . --clobber >/dev/null 2>&1 || true
@@ -389,7 +379,6 @@ jobs:
           else
             echo "exists=0" >> "$GITHUB_OUTPUT"
           fi
-          echo "packages=${#packages[@]}" >> "$GITHUB_OUTPUT"
 
       # No token in this step: it sources every PKGBUILD.
       - name: Reconcile database
