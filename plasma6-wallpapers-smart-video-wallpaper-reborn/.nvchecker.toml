@@ -1,0 +1,4 @@
+[plasma6-wallpapers-smart-video-wallpaper-reborn]
+source = "git"
+git = "https://github.com/luisbocanegra/plasma-smart-video-wallpaper-reborn.git"
+prefix = "v"
