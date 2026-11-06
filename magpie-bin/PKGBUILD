@@ -3,7 +3,7 @@
 
 pkgname=magpie-bin
 pkgver=0.1.3116
-pkgrel=1
+pkgrel=2
 pkgdesc="One place to pick every AI coding agent's model"
 arch=('x86_64' 'aarch64')
 url='https://usemagpie.ai'
@@ -12,6 +12,7 @@ depends=(
   'fontconfig'
   'gdk-pixbuf2'
   'glib2'
+  'glibc'
   'gtk3'
   'hicolor-icon-theme'
   'libsoup3'
@@ -24,7 +25,8 @@ options=('!debug')
 
 source=(
   "magpie-${pkgver}.LICENSE::https://raw.githubusercontent.com/yetone/magpie/v${pkgver}/LICENSE"
-  "magpie-${pkgver}.png::https://usemagpie.ai/img/icon-256.png"
+  "magpie-${pkgver}.THIRD_PARTY_NOTICES::https://raw.githubusercontent.com/yetone/magpie/v${pkgver}/THIRD_PARTY_NOTICES"
+  "magpie-${pkgver}.png::https://raw.githubusercontent.com/yetone/magpie/v${pkgver}/internal/gui/icon-256.png"
 )
 source_x86_64=(
   "magpie-${pkgver}-amd64::https://github.com/yetone/magpie-releases/releases/download/v${pkgver}/magpie-linux-amd64"
@@ -33,6 +35,7 @@ source_aarch64=(
   "magpie-${pkgver}-arm64::https://github.com/yetone/magpie-releases/releases/download/v${pkgver}/magpie-linux-arm64"
 )
 sha256sums=('79d2c8444715d4bc453ec4f8a0aaf2051a4c1ee5ac08f5bd2e5848aef87c7572'
+            '7367c36421134228559c2d1dd8305da757dd08bacc5d620cd36b65b355dcb7e3'
             '57437c6596e05a8fcfc42d4288c030aa00ed86b69fe35d464d69d7026150c704')
 sha256sums_x86_64=('825087563cafa7b3c6e3317fdfc5551a376b206617ff553848948c56824363f3')
 sha256sums_aarch64=('48ae86844818177d48c2748650e4cbab367aa8ad4e9690d69818b37f61814aa8')
@@ -50,6 +53,9 @@ package() {
     "${pkgdir}/usr/share/icons/hicolor/256x256/apps/magpie.png"
   install -Dm644 "${srcdir}/magpie-${pkgver}.LICENSE" \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  # Upstream states the moejs and V8 code it covers is compiled into every binary.
+  install -Dm644 "${srcdir}/magpie-${pkgver}.THIRD_PARTY_NOTICES" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/THIRD_PARTY_NOTICES"
 
   install -dm755 "${pkgdir}/usr/share/applications"
   cat > "${pkgdir}/usr/share/applications/magpie.desktop" <<'EOF'
