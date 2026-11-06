@@ -259,6 +259,8 @@ jobs:
       contents: read
     strategy:
       fail-fast: false
+      # The AUR closes SSH connections when too many arrive at once.
+      max-parallel: 4
       matrix: ${{ fromJson(needs.generate-matrix.outputs.aur_matrix) }}
 
     steps:
