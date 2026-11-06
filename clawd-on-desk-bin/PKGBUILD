@@ -5,7 +5,7 @@ pkgname=clawd-on-desk-bin
 _pkgname='Clawd on Desk'
 pkgver=1.5.0
 _electronversion=41
-pkgrel=1
+pkgrel=2
 pkgdesc="A desktop pet that reacts to your Claude Code sessions in real-time (prebuilt version, uses system electron)"
 arch=('x86_64')
 url="https://github.com/rullerzhou-afk/clawd-on-desk"
@@ -24,7 +24,7 @@ source=(
     "${pkgname%-bin}.sh"
 )
 sha256sums=('8085a9e34a047af49904861a5cb627236fc5d1cd49373a335154a8dad50114d8'
-            '0ccca52406850f39ca4a425404ae5534ddc6627d0772fbf92285f16910c89529')
+            '4239ccd9e313abc9b708c2900bd5a74016081dc6067198b52c73c3da7b67cde3')
 
 prepare() {
     # Unpack the deb data archive
