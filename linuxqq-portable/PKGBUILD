@@ -5,7 +5,7 @@
 
 pkgname=linuxqq-portable
 pkgver=3.2.35_54395
-pkgrel=1
+pkgrel=2
 epoch=1
 pkgdesc="Linux QQ based on Electron, sandboxed by portable"
 arch=('x86_64')
@@ -13,7 +13,7 @@ url="https://im.qq.com/linuxqq"
 license=('LicenseRef-QQ')
 conflicts=('linuxqq')
 provides=('linuxqq')
-depends=('nss' 'alsa-lib' 'gtk3' 'at-spi2-core' 'libvips' 'openjpeg2' 'openslide' 'portable' 'libappindicator-gtk3')
+depends=('nss' 'alsa-lib' 'gtk3' 'at-spi2-core' 'portable' 'libappindicator-gtk3')
 options=('!strip' '!debug')
 
 _debver="${pkgver/_/-}"
@@ -40,10 +40,11 @@ package() {
   # The vendor desktop entry points at /opt/QQ/qq; ship the portable one instead.
   rm -f "$pkgdir/usr/share/applications/qq.desktop"
 
-  # Remove libraries that conflict with the system copies, as the AUR package does.
+  # Remove the bundled libssh2 in favour of the system copy, as the AUR package does.
+  # Keep sharp-lib/libvips-cpp.so.42: QQ's native modules import symbols that
+  # system libvips does not export, such as vips_g_object_ref.
   rm -fv "$pkgdir/opt/QQ/resources/app/avsdk/bugly/libssh2.so.1" \
-         "$pkgdir/opt/QQ/resources/app/libssh2.so.1" \
-         "$pkgdir/opt/QQ/resources/app/sharp-lib/libvips-cpp.so.42"
+         "$pkgdir/opt/QQ/resources/app/libssh2.so.1"
 
   install -Dm755 linuxqq.sh "$pkgdir/usr/lib/portable/info/im.qq.app/bin/linuxqq-start"
   install -Dm755 linuxqq "$pkgdir/usr/lib/portable/info/im.qq.app/bin/linuxqq"
