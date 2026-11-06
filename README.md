@@ -4,7 +4,7 @@ A personal pacman repository built from the PKGBUILDs in this repository. Packag
 
 ## Template
 
-This repository is based on [ouuan/AUR-template](https://github.com/ouuan/AUR-template).
+This repository started from [ouuan/AUR-template](https://github.com/ouuan/AUR-template).
 
 ## What gets published
 
@@ -15,7 +15,7 @@ Every push to `master` builds the package directories changed since the last ful
 - adds the built packages to the repository database and publishes them to the `zhui-arch` release
 - pushes the packages listed in `aur-packages.txt` to the AUR from a separate job, with `.SRCINFO` generated from the committed `PKGBUILD`
 
-A VCS package rebuilt only because upstream has new commits gets a fresh build in `zhui-arch`, but nothing new on the AUR. Packages that were not rebuilt keep their entries, so one failing build no longer takes the whole repository down with it, and the next push retries it. To rebuild a specific package, run the workflow manually with the `packages` input; leave it empty to rebuild everything. Deleting a package directory removes it from the repository on the next push.
+A VCS package rebuilt only because upstream has new commits gets a fresh build in `zhui-arch`, but nothing new on the AUR. Packages that were not rebuilt keep their entries, so one failing build no longer takes the whole repository down with it, and the next push retries it. To rebuild a specific package, run the workflow manually with the `packages` input. Leave it empty to rebuild everything. Deleting a package directory removes it from the repository on the next push.
 
 ## Personal repository
 
