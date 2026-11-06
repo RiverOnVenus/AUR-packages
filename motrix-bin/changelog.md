@@ -1,62 +1,57 @@
-# Name: v2.2.1
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.2.1
-### published at '2026-11-03T04:44:35Z' by github-actions[bot]
+# Name: v2.3.0 
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.3.0
+### published at '2026-11-05T06:40:07Z' by github-actions[bot]
 ---
-# Motrix 2.2.1
+# Motrix 2.3.0
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/v2.2.1/docs/release-notes/2.2.1.zh-CN.md)
+English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.3.0.zh-CN.md)
 
-Motrix 2.2.1 fixes startup recovery for broken magnet sessions and HTTP retries
-that previously lost their original request context or download progress.
+Motrix 2.3.0 refreshes the application artwork, restores cloud-drive directory
+downloads, and improves media tools and settings in Motrix Server. It also adds
+native fnOS integration, with a separate verified package publication workflow.
 
-## Changes since 2.2.0
+## Changes since 2.2.1
 
-- Keep a magnet task with missing torrent metadata or a deleted download directory
-  from blocking engine startup. Recover from hash-verified application metadata
-  where possible; otherwise, back up the engine database and retain the affected
-  task as a removable error. Healthy tasks can start, repeated launches do not
-  recreate deleted directories, and unrelated task history is preserved. Also
-  prevent verified old metadata history from reappearing as an extra HTTP task.
-- Retry eligible failed HTTP downloads using the original task, engine GID,
-  output path, request options, cookies and checkpoint. Retain the required engine
-  context across restarts, including explicitly empty cookie jars. The engine
-  checks the original resource identity before reusing partial data; credentials
-  stay in the engine and are not copied into application task records. Restored
-  failures still require an explicit Retry. Alt+Retry keeps the form for editing
-  a new download request.
-- Discard pending Retry availability responses after Web UI logout,
-  reauthentication, or loss of connection readiness, so an old response cannot
-  reopen a cleared dialog or dispatch a previous retry request.
-- Update the packaged engine to **aria2 1.37.0-motrix.22**, including the HTTP
-  continuation contract and stricter handling of malformed torrent piece lengths
-  and empty input-file lines. Native packaging checks exercise real-engine
-  continuation and session recovery on all six desktop targets.
-- Carry forward the Snap publication recovery fixes: verify and reuse accepted
-  package hashes, preserve each architecture’s revision independently, and
-  release only the complete verified build set.
+- Refresh application icons across desktop packages, the Web UI and fnOS, with
+  native macOS icon resources and updated Windows installer artwork.
+- Restore cloud-drive directory downloads with **aria2 1.37.0-motrix.23** and
+  improve recovery when directory metadata is retried.
+- Let Server users download and verify the official FFmpeg build from Media Tools,
+  with progress and errors in the Web UI. Verified files persist in the data
+  volume, and media capabilities refresh without restarting the Server.
+- Make Web UI directory and in-app notification settings usable. Add Server
+  update checks with stable/beta channel selection; installing a Server update
+  still requires updating the deployment manually.
+- Verify legacy macOS FFmpeg installations against signed release metadata before
+  trusting them, and improve detection and repair feedback in Media Tools.
+- Keep a hidden main window hidden when a new-download dialog is cancelled.
+- Add native fnOS packaging for x64 and ARM64 with account-bound CLI and browser
+  Extension authorization, system directory grants, and service lifecycle checks.
+  The first integration is an administrator-shared instance: administrators share
+  tasks and settings, and ordinary users are denied access. It does not provide
+  per-user task isolation.
 
-Electron remains **45.2.1** and `vscode-jsonrpc` remains **9.0.3**.
+Electron remains **45.2.1**. Native fnOS packages are published separately by the
+[protected fnOS publication workflow](https://github.com/agalwood/Motrix/actions/workflows/fnos-publish.yml)
+after the formal release succeeds and both native architecture builds pass
+package and lifecycle checks. The Release attachments use
+`Motrix-2.3.0-fnos-x64.fpk` and `Motrix-2.3.0-fnos-arm64.fpk`, each with a
+`.sha256` checksum file. Download the package matching your NAS architecture.
+This is direct package distribution, not an app-store submission. Automated
+lifecycle checks use a simulated fnOS file API; real-device compatibility still
+requires installation testing. See the
+[fnOS package guide](https://github.com/agalwood/Motrix/blob/main/packaging/fnos/README.md).
 
-## Upgrade and retry compatibility
+## Upgrade compatibility
 
-**Back up your profile and download files before upgrading.** The new engine
-upgrades its SQLite database to **schema 6**, preserving a complete pre-upgrade
-backup, including committed WAL data. Older engines cannot open schema 6. If a
-downgrade is necessary, stop all engines and restore a verified pre-upgrade backup
-to a separate path; do not delete or reset the upgraded database. Keep backups
-from earlier upgrades as well.
-
-Original-task HTTP continuation requires SQLite persistence, a supporting engine,
-and historical request/resource context captured for that task. Previously deleted
-cookies or missing historical validators cannot be reconstructed. Older tasks and
-custom engines without the required capability may still use the existing
-fresh-download parameter form. Changed or unverifiable resources are not silently
-resumed with old partial bytes. This release does not claim to resolve every
-site-specific authentication failure; [#2426](https://github.com/agalwood/Motrix/issues/2426)
-and [#2488](https://github.com/agalwood/Motrix/issues/2488) remain open for user verification.
+**Back up your profile and download files before upgrading.** The bundled engine
+uses SQLite **schema 6**. When upgrading an older engine database, retain its
+complete pre-upgrade backup; older engines cannot open schema 6. Stop all engines
+before restoring a verified backup to a separate path for a downgrade. Do not
+reset or delete the upgraded database as a substitute for recovery.
 
 Users migrating from Motrix v1 should follow the
-[migration guide](https://github.com/agalwood/Motrix/blob/v2.2.1/docs/legacy-migration.md)
+[migration guide](https://github.com/agalwood/Motrix/blob/v2.3.0/docs/legacy-migration.md)
 and retain the original profile and engine database backups.
 
 ## Downloads and updates
@@ -66,28 +61,27 @@ native x64 and ARM64 builds. No 32-bit desktop packages are provided. Official
 macOS packages require signing and notarization. Windows NSIS installers and ZIP
 archives are unsigned and may trigger SmartScreen; use official Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.2.1.
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.3.0.
 Flatpak bundles and Native Host companions remain separate downloads. Snap
 availability requires verified Store publication to edge and promotion of the
 same amd64/arm64 revisions through candidate to stable.
 
-Server images use `docker.io/motrixapp/motrix-server:2.2.1` and
-`ghcr.io/agalwood/motrix-server:2.2.1`. After public multi-platform runtime
-verification, `2.2`, `2`, `stable`, and `latest` advance to the same verified digest.
-See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.2.1/docs/docker-server.md).
+Server images use `docker.io/motrixapp/motrix-server:2.3.0` and
+`ghcr.io/agalwood/motrix-server:2.3.0`. After public multi-platform runtime
+verification, `2.3`, `2`, `stable`, and `latest` advance to the same verified digest.
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.3.0/docs/docker-server.md).
 
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.2.0...v2.2.1)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.2.1...v2.3.0)
 
 
 ## What's Changed
-* ci(snap): recover uploads from verified tag artifacts by @agalwood in https://github.com/agalwood/Motrix/pull/2483
-* fix(snap): initialize the store client with persistent auth by @agalwood in https://github.com/agalwood/Motrix/pull/2484
-* fix(snap): isolate publication architecture from snap runtime by @agalwood in https://github.com/agalwood/Motrix/pull/2485
-* fix(engine): isolate unrecoverable magnet sessions on startup by @agalwood in https://github.com/agalwood/Motrix/pull/2486
-* fix(downloads): continue retained http tasks through the engine by @agalwood in https://github.com/agalwood/Motrix/pull/2489
-* fix(downloads): discard retry queries after session changes by @agalwood in https://github.com/agalwood/Motrix/pull/2490
-* fix(engine): bundle aria2 motrix.22 with safe session recovery by @agalwood in https://github.com/agalwood/Motrix/pull/2491
-* chore(release): prepare 2.2.1 by @agalwood in https://github.com/agalwood/Motrix/pull/2493
+* fix(window): preserve hidden main when cancelling new tasks by @agalwood in https://github.com/agalwood/Motrix/pull/2495
+* fix(ffmpeg): verify legacy macos binaries against signed releases by @agalwood in https://github.com/agalwood/Motrix/pull/2496
+* fix(server): complete media tools and settings controls by @agalwood in https://github.com/agalwood/Motrix/pull/2497
+* feat(fnos): add native packages and account-bound integration by @agalwood in https://github.com/agalwood/Motrix/pull/2501
+* fix(engine): restore cloud-drive directory downloads by @agalwood in https://github.com/agalwood/Motrix/pull/2503
+* feat(icons): refresh app artwork and add native macos icon by @agalwood in https://github.com/agalwood/Motrix/pull/2505
+* chore(release): prepare 2.3.0 by @agalwood in https://github.com/agalwood/Motrix/pull/2506
 
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.2.0...v2.2.1
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.2.1...v2.3.0
