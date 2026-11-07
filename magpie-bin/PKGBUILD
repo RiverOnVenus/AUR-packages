@@ -2,8 +2,8 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=magpie-bin
-pkgver=0.1.3116
-pkgrel=2
+pkgver=0.1.3217
+pkgrel=1
 pkgdesc="One place to pick every AI coding agent's model"
 arch=('x86_64' 'aarch64')
 url='https://usemagpie.ai'
@@ -37,8 +37,8 @@ source_aarch64=(
 sha256sums=('79d2c8444715d4bc453ec4f8a0aaf2051a4c1ee5ac08f5bd2e5848aef87c7572'
             '7367c36421134228559c2d1dd8305da757dd08bacc5d620cd36b65b355dcb7e3'
             '57437c6596e05a8fcfc42d4288c030aa00ed86b69fe35d464d69d7026150c704')
-sha256sums_x86_64=('825087563cafa7b3c6e3317fdfc5551a376b206617ff553848948c56824363f3')
-sha256sums_aarch64=('48ae86844818177d48c2748650e4cbab367aa8ad4e9690d69818b37f61814aa8')
+sha256sums_x86_64=('634c18c0357fa1ea1d5d4490192ad457d6a7779e1bd55b2ba7f3f2a347b728f1')
+sha256sums_aarch64=('6708b0d6a74590b907e69f211f96662aa6d4154bcae0c84e8a3cd02c84cfcd0a')
 
 package() {
   local _suffix
