@@ -1,0 +1,4 @@
+[btdu]
+source = "git"
+git = "https://github.com/CyberShadow/btdu.git"
+prefix = "v"

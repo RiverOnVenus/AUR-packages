@@ -1,0 +1,69 @@
+# Maintainer: Vladimir Panteleev <arch-pkg at thecybershadow.net>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=btdu
+pkgver=0.7.2
+pkgrel=1
+pkgdesc='Sampling disk usage profiler for btrfs'
+arch=('x86_64' 'aarch64')
+url='https://github.com/CyberShadow/btdu'
+license=('GPL-2.0-only')
+depends=('ncurses')
+makedepends=('ldc' 'dub')
+
+# Must match dub.selections.json; the dub packages are fetched in source() so
+# that neither prepare() nor build() touches the network.
+_d_ae_ver=0.0.3701
+_d_btrfs_ver=0.0.21
+_d_ncurses_ver=1.0.0
+_d_emsi_containers_ver=0.9.0
+
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz"
+        "ae-${_d_ae_ver}.tar.gz::https://github.com/CyberShadow/ae/archive/v${_d_ae_ver}.tar.gz"
+        "d-btrfs-${_d_btrfs_ver}.tar.gz::https://github.com/CyberShadow/d-btrfs/archive/v${_d_btrfs_ver}.tar.gz"
+        "ncurses-${_d_ncurses_ver}.tar.gz::https://github.com/D-Programming-Deimos/ncurses/archive/v${_d_ncurses_ver}.tar.gz"
+        "emsi_containers-${_d_emsi_containers_ver}.tar.gz::https://github.com/dlang-community/containers/archive/v${_d_emsi_containers_ver}.tar.gz"
+        "0001-ae-sys-cmd-cast-void-buffers-for-pipe.patch")
+sha256sums=('695ded59fb2029c8ae48ca0f990e68928841cdf36a4cf4cbc2485460cadbbd67'
+            'd73795735dafe48c7dbaabdabc122f3cc94cebb4b301a2aef9a9df9e0089bf05'
+            '343bef0cd60f4708fdab721a2aff003d0921267cc99ebfb778e93793433e3970'
+            'b5db677b75ebef7a1365ca4ef768f7344a2bc8d07ec223a2ada162f185d0d9c6'
+            '5e256b84bbdbd2bd625cba0472ea27a1fde6d673d37a85fe971a20d52874acaa'
+            'f207de54678a191279eaa70299694dad8cde8dba6fc9aacbdc0e56c72e593bce')
+
+prepare() {
+  # dmd PR 22593 makes hasIndirections!void true; see the patch header.
+  patch -d "ae-${_d_ae_ver}" -Np1 -i "$srcdir/0001-ae-sys-cmd-cast-void-buffers-for-pipe.patch"
+
+  # ae's modules live at the repository root but import as "ae.*", so the
+  # import root has to be $srcdir with the package in a directory named "ae".
+  ln -sfT "ae-${_d_ae_ver}" "$srcdir/ae"
+
+  cd "$pkgname-$pkgver"
+  # Register the vendored packages locally; keep dub's own config in $srcdir.
+  # The containers tarball extracts to "containers-$ver", not its package name.
+  rm -rf "$srcdir/_dub"
+  HOME="$srcdir/_dub" dub add-local ../ae "$_d_ae_ver"
+  HOME="$srcdir/_dub" dub add-local "../d-btrfs-${_d_btrfs_ver}" "$_d_btrfs_ver"
+  HOME="$srcdir/_dub" dub add-local "../ncurses-${_d_ncurses_ver}" "$_d_ncurses_ver"
+  HOME="$srcdir/_dub" dub add-local "../containers-${_d_emsi_containers_ver}" "$_d_emsi_containers_ver"
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+  # ldc2 ignores makepkg's LDFLAGS, so request full RELRO explicitly.
+  export DFLAGS="-L=-znow"
+  HOME="$srcdir/_dub" dub build --skip-registry=all --compiler=ldc2 -b release
+}
+
+check() {
+  cd "$pkgname-$pkgver"
+  # Smoke test: verifies the binary starts and its dynamic links resolve.
+  ./btdu --version | grep -F "btdu v$pkgver"
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 "$pkgname" -t "$pkgdir/usr/bin"
+  install -Dm644 "$pkgname.1" -t "$pkgdir/usr/share/man/man1"
+}

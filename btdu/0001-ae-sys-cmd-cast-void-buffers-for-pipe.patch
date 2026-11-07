@@ -1,0 +1,25 @@
+Casts for dmd PR 22593, which makes hasIndirections!void true and breaks
+void[] arguments to ae.sys.cmd.pipe. Upstream ae already moved these
+functions to ubyte[] in f853194; this is the minimal cast-based backport.
+Remove when the pinned ae version is bumped past f853194.
+
+--- a/sys/cmd.d
++++ b/sys/cmd.d
+@@ -248,7 +248,7 @@
+ ubyte[] iconv(const(void)[] data, string inputEncoding, string outputEncoding)
+ {
+ 	auto args = ["timeout", "30", "iconv", "-f", inputEncoding, "-t", outputEncoding];
+-	auto result = data.pipe(args);
++	auto result = (cast(const(ubyte)[])data).pipe(args);
+ 	return cast(ubyte[])result;
+ }
+ 
+@@ -270,7 +270,7 @@
+ /// Wrapper for the `sha1sum` program.
+ string sha1sum(const(void)[] data)
+ {
+-	auto output = cast(string)data.pipe(["sha1sum", "-b", "-"]);
++	auto output = cast(string)(cast(const(ubyte)[])data).pipe(["sha1sum", "-b", "-"]);
+ 	return output[0..40];
+ }
+ 
