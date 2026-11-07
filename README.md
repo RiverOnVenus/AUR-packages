@@ -1,23 +1,17 @@
 # AUR-packages
 
-A personal pacman repository built from the PKGBUILDs in this repository. Packages listed in `aur-packages.txt` are also published to the AUR, where [RiverOnVenus](https://aur.archlinux.org/account/RiverOnvenus) maintains them. Not every directory here belongs to a package maintained on the AUR by the same person.
-
-## Credits
-
-The build and release workflow began as [ouuan/AUR-template](https://github.com/ouuan/AUR-template) and has since been rewritten.
-
-Packages that are local rebuilds or forks of packages maintained on the AUR or in [Kraftland/portable-arch](https://github.com/Kraftland/portable-arch) keep the original `# Maintainer:` line and add a `# Contributor:` line. Each `PKGBUILD` names its upstream packagers.
+A personal pacman repository built from the PKGBUILDs in this tree. Packages listed in `aur-packages.txt` are also published to the AUR under [RiverOnVenus](https://aur.archlinux.org/account/RiverOnvenus).
 
 ## What gets published
 
-`aur-packages.txt` lists the packages that are pushed to the AUR. A directory that is not listed there is still built and published to the personal repository, but is never uploaded to the AUR. These are local rebuilds or forks of packages maintained elsewhere, on the AUR or in [Kraftland/portable-arch](https://github.com/Kraftland/portable-arch), and their `PKGBUILD` keeps the original maintainer line and adds a `# Contributor:` line. Keeping them here means updates follow this repository's review and build instead of being applied by an AUR helper.
+A directory listed in `aur-packages.txt` is pushed to the AUR. Everything else is still built and published to the personal repository. These directories are local rebuilds and forks of packages maintained elsewhere, kept here so updates follow this repository's review and build instead of being applied by an AUR helper.
 
 Every push to `master` builds the package directories changed since the last fully successful push, then:
 
 - adds the built packages to the repository database and publishes them to the `zhui-arch` release
 - pushes the packages listed in `aur-packages.txt` to the AUR from a separate job, with `.SRCINFO` generated from the committed `PKGBUILD`
 
-A VCS package rebuilt only because upstream has new commits gets a fresh build in `zhui-arch`, but nothing new on the AUR. Packages that were not rebuilt keep their entries, so one failing build no longer takes the whole repository down with it, and the next push retries it. To rebuild a specific package, run the workflow manually with the `packages` input. Leave it empty to rebuild everything. Deleting a package directory removes it from the repository on the next push.
+A VCS package rebuilt only because upstream has new commits gets a fresh build in `zhui-arch` but nothing new on the AUR. Packages that were not rebuilt keep their entries, and a failed build is retried on the next push. To rebuild a specific package, run the workflow manually with the `packages` input, or leave it empty to rebuild everything. Deleting a package directory removes it from the repository on the next push.
 
 ## Personal repository
 
@@ -29,6 +23,10 @@ SigLevel = Optional TrustAll
 Server = https://github.com/RiverOnVenus/AUR-packages/releases/download/zhui-arch
 ```
 
-Then `pacman -Sy` and install by name. The database is updated after every `master` push, so new versions show up after the workflow finishes.
+Then `pacman -Sy` and install by name. The database is updated after every `master` push, so new versions show up once the workflow finishes.
 
-Packages installed from this repository are resolved against a sync database, which means they are no longer treated as foreign by `paru` and `yay`. AUR updates stop replacing them.
+Packages installed from this repository are resolved against a sync database, so `paru` and `yay` no longer treat them as foreign and AUR updates stop replacing them.
+
+## Credits
+
+The build and release workflow started from [ouuan/AUR-template](https://github.com/ouuan/AUR-template) and has since been rewritten. Local rebuilds and forks of packages maintained on the AUR or in [Kraftland/portable-arch](https://github.com/Kraftland/portable-arch) keep the original `# Maintainer:` line and add a `# Contributor:` line. Each `PKGBUILD` names its upstream packagers.
