@@ -2,9 +2,11 @@
 
 A personal pacman repository built from the PKGBUILDs in this repository. Packages listed in `aur-packages.txt` are also published to the AUR, where [RiverOnVenus](https://aur.archlinux.org/account/RiverOnvenus) maintains them. Not every directory here belongs to a package maintained on the AUR by the same person.
 
-## Template
+## Credits
 
-This repository started from [ouuan/AUR-template](https://github.com/ouuan/AUR-template).
+The build and release workflow began as [ouuan/AUR-template](https://github.com/ouuan/AUR-template) and has since been rewritten.
+
+Packages that are local rebuilds or forks of packages maintained on the AUR or in [Kraftland/portable-arch](https://github.com/Kraftland/portable-arch) keep the original `# Maintainer:` line and add a `# Contributor:` line. Each `PKGBUILD` names its upstream packagers.
 
 ## What gets published
 
