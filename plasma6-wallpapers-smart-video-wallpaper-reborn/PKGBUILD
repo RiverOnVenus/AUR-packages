@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 _gitname=plasma-smart-video-wallpaper-reborn
 pkgname=plasma6-wallpapers-smart-video-wallpaper-reborn
-pkgver=2.16.0
+pkgver=2.17.0
 pkgrel=1
 pkgdesc="Smart KDE Plasma 6 Wallpaper plugin to play videos on your Desktop/Lock Screen"
 arch=('x86_64')
@@ -11,16 +11,8 @@ license=('GPL-2.0-or-later')
 depends=('plasma-workspace' 'plasma5support' 'qt6-multimedia' 'qt6-multimedia-backend')
 makedepends=('cmake' 'extra-cmake-modules' 'gettext')
 # The release asset holds only the KPackage and lacks the compiled plugin.
-source=("$_gitname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz"
-        "fix-screen-state-cmd.patch")
-sha256sums=('0831716107ff8d284edbf3c2ee2b85fedcc797590aec788143193aadfdb31c56'
-            '6370b4fca9fc657b607c53fe2b8ecfbca6fbc75dbe1f4f568fa3d7c8b436d062')
-
-prepare() {
-  cd "$_gitname-$pkgver"
-  # Backport of upstream 1ee2ff3; remove after the release following 2.16.0.
-  patch -Np1 -i "$srcdir/fix-screen-state-cmd.patch"
-}
+source=("$_gitname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('b0eaafe38d1263fa37c2338ec6d93a992f4a82e8d2060c560e7bb863ca97b80c')
 
 build() {
   cmake -B build -S "$_gitname-$pkgver" \
@@ -32,7 +24,4 @@ build() {
 
 package() {
   DESTDIR="$pkgdir" cmake --install build
-  # plasma_install_package() drops the exec bit the wallpaper needs to spawn
-  # this helper. Upstream 0b4beb8 fixes it; remove after the release following 2.16.0.
-  chmod 755 "$pkgdir/usr/share/plasma/wallpapers/luisbocanegra.smart.video.wallpaper.reborn/contents/ui/tools/gdbus_get_signal.sh"
 }
