@@ -2,13 +2,12 @@
 pkgname=wordcraft-bin
 _pkgname=wordcraft
 pkgver=0.15.2
-pkgrel=1
+pkgrel=2
 pkgdesc="Open-source native word processor, Word alternative (prebuilt binary)"
 arch=('x86_64' 'aarch64')
 url="https://github.com/storytold/wordcraft"
-license=('Apache-2.0' 'MIT')
-depends=('gcc-libs' 'glibc' 'hicolor-icon-theme' 'libxkbcommon')
-optdepends=('vulkan-icd-loader: GPU-accelerated rendering')
+license=('MIT OR Apache-2.0')
+depends=('gcc-libs' 'glibc' 'hicolor-icon-theme' 'libxkbcommon' 'libxkbcommon-x11' 'vulkan-icd-loader')
 provides=("$_pkgname")
 conflicts=("$_pkgname")
 options=('!strip')
