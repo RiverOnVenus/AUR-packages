@@ -1,12 +1,12 @@
 # Maintainer: czyt <czytcn@gmail.com>
 pkgname=elyterminal-bin
 pkgver=0.2.3
-pkgrel=1
+pkgrel=2
 pkgdesc="A GPU-accelerated terminal emulator built on GPUI"
 arch=('x86_64')
 url="https://github.com/ELY-Open-Source/ELYTerminal"
 license=('MIT')
-depends=('libxkbcommon' 'libxkbcommon-x11' 'libxcb' 'gcc-libs' 'glibc' 'hicolor-icon-theme')
+depends=('libxkbcommon' 'libxkbcommon-x11' 'libxcb' 'gcc-libs' 'glibc' 'hicolor-icon-theme' 'vulkan-icd-loader' 'wayland' 'libglvnd')
 provides=('elyterminal')
 conflicts=('elyterminal')
 options=('!strip' '!debug')
