@@ -22,6 +22,11 @@ warn() {
 }
 
 echo "::group::Configure pacman"
+# pacman's built-in downloader aborts after 10s below 1 B/s and never retries,
+# so one stalled GitHub release download fails the whole build. curl retries
+# the transfer and keeps the same low-speed cutoff.
+sed -i '\|^\[options\]|a XferCommand = /usr/bin/curl -L -f -o %o %u --retry 5 --retry-delay 3 --speed-limit 1 --speed-time 10' /etc/pacman.conf
+
 # Dependencies resolve from the official repositories first, then from this
 # repository's own release, so a package depending on another one here gets
 # the reviewed build instead of the AUR version. Only what neither provides
