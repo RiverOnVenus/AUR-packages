@@ -2,61 +2,35 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=alma-desktop-bin
-pkgver=0.4.484
+pkgver=0.4.501
 pkgrel=1
 pkgdesc='AI provider orchestration desktop app'
 arch=('x86_64')
 url='https://alma.now'
 license=('LicenseRef-custom')
 depends=(
-  'alsa-lib'
-  'at-spi2-core'
-  'bash'
-  'cairo'
-  'dbus'
-  'expat'
   'gcc-libs'
-  'glib2'
-  'glibc'
   'gtk3'
   'hicolor-icon-theme'
-  'libcups'
-  'libgomp'
-  'libnotify'
-  'libsecret'
-  'libx11'
-  'libxcb'
-  'libxcomposite'
-  'libxdamage'
-  'libxext'
-  'libxfixes'
-  'libxkbcommon'
-  'libxrandr'
-  'mesa'
-  'nspr'
-  'nss'
-  'pango'
-  'systemd-libs'
-  'vulkan-icd-loader'
-  'xdg-utils'
+  'webkit2gtk-4.1'
 )
 optdepends=(
   'java-runtime: run Java-based MCP servers'
   'nodejs: run Node.js-based MCP servers'
   'python: run Python-based MCP servers'
-  'python-gobject: required for Linux remote screen (xdg-desktop-portal)'
-  'gst-plugin-pipewire: required for Linux remote screen streaming'
-  'gst-plugins-good: faster JPEG encoding for the remote screen'
+  'libsecret: store provider credentials in the system keyring'
 )
 provides=('alma-desktop')
 conflicts=('alma-appimage')
 source=("https://github.com/yetone/alma-releases/releases/download/v${pkgver}/alma-${pkgver}-linux-amd64.deb")
-sha256sums=('a6f49dcedf4bcf58b7fb8b90328b9674d66f208f6d873629a6df2a9ae581b6b8')
+sha256sums=('43fe47a911bee83ade3abe8ed0f706823648f420e6c976ebaf0495a088db9467')
 
 prepare() {
-  bsdtar -xf "${srcdir}/alma-${pkgver}-linux-amd64.deb" -C "${srcdir}" data.tar.xz
-  mkdir -p "${srcdir}/payload"
-  bsdtar -xf "${srcdir}/data.tar.xz" -C "${srcdir}/payload"
+  # The payload member was data.tar.xz before 0.4.5xx; upstream now ships data.tar.gz.
+  bsdtar -xf "${srcdir}/alma-${pkgver}-linux-amd64.deb" -C "${srcdir}" 'data.tar.*'
+  local data=("${srcdir}"/data.tar.*)
+  install -dm755 "${srcdir}/payload"
+  bsdtar -xf "${data[0]}" -C "${srcdir}/payload"
 }
 
 package() {
@@ -64,10 +38,8 @@ package() {
 
   # The Debian postinst creates this alternative; skip it and the CLI entry point is missing.
   install -d "${pkgdir}/usr/bin"
-  ln -s /opt/Alma/alma "${pkgdir}/usr/bin/alma"
+  ln -s /opt/alma/alma "${pkgdir}/usr/bin/alma"
 
-  install -Dm644 "${srcdir}/payload/opt/Alma/LICENSE.electron.txt" \
-    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.electron.txt"
-  install -Dm644 "${srcdir}/payload/opt/Alma/LICENSES.chromium.html" \
-    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.chromium.html"
+  install -Dm644 "${srcdir}/payload/opt/alma/THIRD_PARTY_NOTICES.md" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/THIRD_PARTY_NOTICES.md"
 }
