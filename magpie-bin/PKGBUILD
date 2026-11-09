@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=magpie-bin
-pkgver=0.1.3316
+pkgver=0.1.3419
 pkgrel=1
 pkgdesc="One place to pick every AI coding agent's model"
 arch=('x86_64' 'aarch64')
@@ -35,10 +35,10 @@ source_aarch64=(
   "magpie-${pkgver}-arm64::https://github.com/yetone/magpie-releases/releases/download/v${pkgver}/magpie-linux-arm64"
 )
 sha256sums=('79d2c8444715d4bc453ec4f8a0aaf2051a4c1ee5ac08f5bd2e5848aef87c7572'
-            '7367c36421134228559c2d1dd8305da757dd08bacc5d620cd36b65b355dcb7e3'
+            '98720e7763ccebf6fce1d95d478ab4f8c8f71315438e20ad4ccf0ef44eb2b76e'
             '57437c6596e05a8fcfc42d4288c030aa00ed86b69fe35d464d69d7026150c704')
-sha256sums_x86_64=('d3163c8b69ce926be95249f74f0e2c5e5f69f3520b1609e82f15c31dd4976f88')
-sha256sums_aarch64=('5dbf7cf86b83c4f1fd1b027304038893c4a7f3a4369541b206cb30c41439f453')
+sha256sums_x86_64=('9ff1a1981a94853c95fd7e9042903e4c9b4ddfd2e03c1a5fd3112ce6840e3368')
+sha256sums_aarch64=('c40ab2858fa1ffb2214e4db331294b19b7121fdab37b05c1e4fa8b9115dd1c79')
 
 package() {
   local _suffix
