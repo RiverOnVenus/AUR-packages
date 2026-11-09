@@ -3,9 +3,9 @@
 
 pkgname=magpie-bin
 pkgver=0.1.3419
-pkgrel=1
+pkgrel=2
 pkgdesc="One place to pick every AI coding agent's model"
-arch=('x86_64' 'aarch64')
+arch=('x86_64')
 url='https://usemagpie.ai'
 license=('MIT')
 depends=(
@@ -31,21 +31,13 @@ source=(
 source_x86_64=(
   "magpie-${pkgver}-amd64::https://github.com/yetone/magpie-releases/releases/download/v${pkgver}/magpie-linux-amd64"
 )
-source_aarch64=(
-  "magpie-${pkgver}-arm64::https://github.com/yetone/magpie-releases/releases/download/v${pkgver}/magpie-linux-arm64"
-)
 sha256sums=('79d2c8444715d4bc453ec4f8a0aaf2051a4c1ee5ac08f5bd2e5848aef87c7572'
             '98720e7763ccebf6fce1d95d478ab4f8c8f71315438e20ad4ccf0ef44eb2b76e'
             '57437c6596e05a8fcfc42d4288c030aa00ed86b69fe35d464d69d7026150c704')
 sha256sums_x86_64=('9ff1a1981a94853c95fd7e9042903e4c9b4ddfd2e03c1a5fd3112ce6840e3368')
-sha256sums_aarch64=('c40ab2858fa1ffb2214e4db331294b19b7121fdab37b05c1e4fa8b9115dd1c79')
 
 package() {
-  local _suffix
-  case "$CARCH" in
-    x86_64)  _suffix=amd64 ;;
-    aarch64) _suffix=arm64 ;;
-  esac
+  local _suffix=amd64
 
   install -Dm755 "${srcdir}/magpie-${pkgver}-${_suffix}" "${pkgdir}/usr/bin/magpie"
 

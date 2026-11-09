@@ -3,9 +3,9 @@
 
 pkgname=herdr-bin
 pkgver=0.9.5
-pkgrel=1
+pkgrel=2
 pkgdesc='Terminal workspace manager for AI coding agents'
-arch=('x86_64' 'aarch64')
+arch=('x86_64')
 url='https://herdr.dev'
 license=('Apache-2.0')
 depends=()
@@ -16,8 +16,6 @@ source=("LICENSE::https://raw.githubusercontent.com/herdrdev/herdr/v${pkgver}/LI
 sha256sums=('c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4')
 source_x86_64=("herdr-${pkgver}-x86_64::https://github.com/herdrdev/herdr/releases/download/v${pkgver}/herdr-linux-x86_64")
 sha256sums_x86_64=('14d9e8bc8b4a9e0118d77c32266f76d461f09b40342eb23752960bd89f59929d')
-source_aarch64=("herdr-${pkgver}-aarch64::https://github.com/herdrdev/herdr/releases/download/v${pkgver}/herdr-linux-aarch64")
-sha256sums_aarch64=('17d7536f2da50859523680ef279dffcac8e4a235f4e46fe8da6c2ec44141897c')
 
 package() {
   local _bin="${srcdir}/herdr-${pkgver}-${CARCH}"

@@ -4,9 +4,9 @@
 
 pkgname=ventoy-bin
 pkgver=1.1.18
-pkgrel=2
+pkgrel=3
 pkgdesc="A new bootable USB solution"
-arch=('aarch64' 'i686' 'x86_64')
+arch=('x86_64')
 url="http://www.ventoy.net"
 license=('GPL-3.0-or-later')
 depends=(
@@ -105,7 +105,5 @@ package() {
   install -Dm755 "$srcdir/${pkgname%-bin}"{,gui,web,plugson,-{,extend-}persistent} -vt "$pkgdir"/usr/bin/
 
   # Remove Gtk 2 files
-  if [ "${CARCH}" == "x86_64" ]; then
-    rm "$pkgdir/opt/${pkgname%-bin}/tool/${CARCH}/Ventoy2Disk.gtk2"
-  fi
+  rm "$pkgdir/opt/${pkgname%-bin}/tool/${CARCH}/Ventoy2Disk.gtk2"
 }

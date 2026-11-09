@@ -8,9 +8,9 @@
 pkgname=vscodium-bin
 _pkgname=VSCodium
 pkgver=1.143.17232
-pkgrel=2
+pkgrel=3
 pkgdesc="Binary releases of VS Code without MS branding/telemetry/licensing."
-arch=('x86_64' 'aarch64')
+arch=('x86_64')
 url="https://github.com/VSCodium/vscodium"
 license=('MIT')
 depends=(
@@ -33,7 +33,6 @@ sha256sums=('3a5bc109974fcf408855c13965f6d6be0997655c5b359de0bfd19a678c00844e'
             '2fa3f8948a0a17ea30b62845caf1ee8aae8b55b5417273920ca2df2642209e0e')
 sha256sums+=('e622e6bdb70b0cfec57ad9df8717ea023b87e5e215003119b5a1a4d059fcd347')
 sha256sums_x86_64=('ca1895aa040bd91a09c709d79eac7862d8c1aa0237fdc25b503deeb8bcd87efd')
-sha256sums_aarch64=('9f270ae242561812acd02be9cf5c13c848da359b356327adfe44b815a9532309')
 
 source=('vscodium-bin.desktop'
         'vscodium-bin-url-handler.desktop'
@@ -42,7 +41,6 @@ source=('vscodium-bin.desktop'
         'LICENSE')
 source+=("https://raw.githubusercontent.com/VSCodium/vscodium/refs/tags/${pkgver}/src/stable/resources/linux/code.svg")
 source_x86_64=("https://github.com/VSCodium/vscodium/releases/download/${pkgver}/${_pkgname}-linux-x64-${pkgver}.tar.gz")
-source_aarch64=("https://github.com/VSCodium/vscodium/releases/download/${pkgver}/${_pkgname}-linux-arm64-${pkgver}.tar.gz")
 
 shopt -s extglob
 

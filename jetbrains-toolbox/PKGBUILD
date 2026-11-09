@@ -2,9 +2,9 @@
 
 pkgname=jetbrains-toolbox
 pkgver=3.9.1.89198
-pkgrel=1
+pkgrel=2
 pkgdesc='Manage all your JetBrains Projects and Tools'
-arch=('x86_64' 'i686')
+arch=('x86_64')
 url='https://www.jetbrains.com/toolbox/'
 license=('custom:jetbrains')
 depends=(
