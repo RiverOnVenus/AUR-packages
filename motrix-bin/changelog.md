@@ -1,46 +1,18 @@
-# Name: v2.3.0 
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.3.0
-### published at '2026-11-05T06:40:07Z' by github-actions[bot]
+# Name: v2.4.0 
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.0
+### published at '2026-11-08T13:17:21Z' by github-actions[bot]
 ---
-# Motrix 2.3.0
+# Motrix 2.4.0
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.3.0.zh-CN.md)
+English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.0.zh-CN.md)
 
-Motrix 2.3.0 refreshes the application artwork, restores cloud-drive directory
-downloads, and improves media tools and settings in Motrix Server. It also adds
-native fnOS integration, with a separate verified package publication workflow.
+## Changes since 2.3.0
 
-## Changes since 2.2.1
-
-- Refresh application icons across desktop packages, the Web UI and fnOS, with
-  native macOS icon resources and updated Windows installer artwork.
-- Restore cloud-drive directory downloads with **aria2 1.37.0-motrix.23** and
-  improve recovery when directory metadata is retried.
-- Let Server users download and verify the official FFmpeg build from Media Tools,
-  with progress and errors in the Web UI. Verified files persist in the data
-  volume, and media capabilities refresh without restarting the Server.
-- Make Web UI directory and in-app notification settings usable. Add Server
-  update checks with stable/beta channel selection; installing a Server update
-  still requires updating the deployment manually.
-- Verify legacy macOS FFmpeg installations against signed release metadata before
-  trusting them, and improve detection and repair feedback in Media Tools.
-- Keep a hidden main window hidden when a new-download dialog is cancelled.
-- Add native fnOS packaging for x64 and ARM64 with account-bound CLI and browser
-  Extension authorization, system directory grants, and service lifecycle checks.
-  The first integration is an administrator-shared instance: administrators share
-  tasks and settings, and ordinary users are denied access. It does not provide
-  per-user task isolation.
-
-Electron remains **45.2.1**. Native fnOS packages are published separately by the
-[protected fnOS publication workflow](https://github.com/agalwood/Motrix/actions/workflows/fnos-publish.yml)
-after the formal release succeeds and both native architecture builds pass
-package and lifecycle checks. The Release attachments use
-`Motrix-2.3.0-fnos-x64.fpk` and `Motrix-2.3.0-fnos-arm64.fpk`, each with a
-`.sha256` checksum file. Download the package matching your NAS architecture.
-This is direct package distribution, not an app-store submission. Automated
-lifecycle checks use a simulated fnOS file API; real-device compatibility still
-requires installation testing. See the
-[fnOS package guide](https://github.com/agalwood/Motrix/blob/main/packaging/fnos/README.md).
+- Choose **File → Create Torrent File** to create a BitTorrent v1 `.torrent` from a file or folder. Desktop users can select local files. In the Server Web UI, select a source within your account’s readable download roots and save the torrent to your browser. Enable seeding after saving to verify and seed the original files.
+- Install the experimental native Synology SPK through Package Center on supported x86_64 and ARM64 models running DSM 7.2.2-72806 or later. Local administrators share the same tasks and settings. See the [Synology installation guide](https://github.com/agalwood/Motrix/blob/v2.4.0/packaging/synology/README.md) for model coverage.
+- Fix Windows downloads failing to remove a temporary filename suffix when file timestamps change during finalization. A verified retry can recover a quarantined file while preserving conflicting files.
+- Separate release workflows verify and publish fnOS FPKs and Synology SPKs. Download the package for your NAS architecture from the Release and check the accompanying SHA-256.
+- Update the desktop Electron runtime to **45.2.3**.
 
 ## Upgrade compatibility
 
@@ -51,7 +23,7 @@ before restoring a verified backup to a separate path for a downgrade. Do not
 reset or delete the upgraded database as a substitute for recovery.
 
 Users migrating from Motrix v1 should follow the
-[migration guide](https://github.com/agalwood/Motrix/blob/v2.3.0/docs/legacy-migration.md)
+[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.0/docs/legacy-migration.md)
 and retain the original profile and engine database backups.
 
 ## Downloads and updates
@@ -61,27 +33,26 @@ native x64 and ARM64 builds. No 32-bit desktop packages are provided. Official
 macOS packages require signing and notarization. Windows NSIS installers and ZIP
 archives are unsigned and may trigger SmartScreen; use official Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.3.0.
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.0.
 Flatpak bundles and Native Host companions remain separate downloads. Snap
 availability requires verified Store publication to edge and promotion of the
 same amd64/arm64 revisions through candidate to stable.
 
-Server images use `docker.io/motrixapp/motrix-server:2.3.0` and
-`ghcr.io/agalwood/motrix-server:2.3.0`. After public multi-platform runtime
-verification, `2.3`, `2`, `stable`, and `latest` advance to the same verified digest.
-See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.3.0/docs/docker-server.md).
+Server images use `docker.io/motrixapp/motrix-server:2.4.0` and
+`ghcr.io/agalwood/motrix-server:2.4.0`. After public multi-platform runtime
+verification, `2.4`, `2`, `stable`, and `latest` advance to the same verified digest.
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.0/docs/docker-server.md).
 
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.2.1...v2.3.0)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.3.0...v2.4.0)
 
 
 ## What's Changed
-* fix(window): preserve hidden main when cancelling new tasks by @agalwood in https://github.com/agalwood/Motrix/pull/2495
-* fix(ffmpeg): verify legacy macos binaries against signed releases by @agalwood in https://github.com/agalwood/Motrix/pull/2496
-* fix(server): complete media tools and settings controls by @agalwood in https://github.com/agalwood/Motrix/pull/2497
-* feat(fnos): add native packages and account-bound integration by @agalwood in https://github.com/agalwood/Motrix/pull/2501
-* fix(engine): restore cloud-drive directory downloads by @agalwood in https://github.com/agalwood/Motrix/pull/2503
-* feat(icons): refresh app artwork and add native macos icon by @agalwood in https://github.com/agalwood/Motrix/pull/2505
-* chore(release): prepare 2.3.0 by @agalwood in https://github.com/agalwood/Motrix/pull/2506
+* ci(fnos): publish verified native packages for stable releases by @agalwood in https://github.com/agalwood/Motrix/pull/2507
+* fix(finalize): stabilize Windows suffix renames and recover quarantines by @agalwood in https://github.com/agalwood/Motrix/pull/2512
+* docs: revise preflight checklist items in issue template [skip ci] by @3gf8jv4dv in https://github.com/agalwood/Motrix/pull/2510
+* feat(synology): add native DSM 7 packages for x86_64 and ARM64 by @agalwood in https://github.com/agalwood/Motrix/pull/2513
+* feat(torrent): create torrent files from local files and folders by @a0666660 in https://github.com/agalwood/Motrix/pull/2306
+* chore(release): update dependencies and prepare 2.4.0 by @agalwood in https://github.com/agalwood/Motrix/pull/2514
 
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.2.1...v2.3.0
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.3.0...v2.4.0
