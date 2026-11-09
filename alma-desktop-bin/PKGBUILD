@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=alma-desktop-bin
-pkgver=0.4.507
+pkgver=0.4.540
 pkgrel=1
 pkgdesc='AI provider orchestration desktop app'
 arch=('x86_64')
@@ -20,15 +20,13 @@ optdepends=(
   'python: run Python-based MCP servers and the screen sharing helper'
   'python-gobject: share this screen through xdg-desktop-portal'
   'gst-plugin-pipewire: screen sharing stream source'
-  # Without jpegenc the helper sends raw BGRx frames, a path the native build
-  # cannot encode yet (upstream issue 213).
-  'gst-plugins-good: JPEG screen frames'
+  'gst-plugins-good: JPEG screen frames (optional, lower CPU)'
   'libsecret: store provider credentials in the system keyring'
 )
 provides=('alma-desktop')
 conflicts=('alma-appimage')
 source=("https://github.com/yetone/alma-releases/releases/download/v${pkgver}/alma-${pkgver}-linux-amd64.deb")
-sha256sums=('08f2810127f4a871f9b94f4037a6cb364dfe7a2b00bbb301675dec54293579e7')
+sha256sums=('b83dd58a2a54c5cc6f725cac72798dd58c3a5ba220915bab662bc697470444d7')
 
 prepare() {
   # The payload member was data.tar.xz before 0.4.5xx; upstream now ships data.tar.gz.
