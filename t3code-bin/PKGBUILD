@@ -1,7 +1,7 @@
 # Maintainer: RiverOnVenus <aur@zhui.dev>
 pkgname=t3code-bin
 pkgver=0.1.7
-pkgrel=1
+pkgrel=2
 pkgdesc='Desktop control surface for local coding agents'
 arch=('x86_64')
 url='https://t3.codes'
@@ -59,15 +59,15 @@ prepare() {
 }
 
 package() {
-  install -dm755 "${pkgdir}/usr/lib"
+  install -dm755 "${pkgdir}/opt"
   cp -a --no-preserve=ownership "${srcdir}/payload/opt/T3 Code (Beta)" \
-    "${pkgdir}/usr/lib/${_pkgname}"
+    "${pkgdir}/opt/${pkgname}"
 
-  # Debian-only, and points at the upstream /opt path.
-  rm -f "${pkgdir}/usr/lib/${_pkgname}/resources/apparmor-profile"
+  # Debian-only, and points at the upstream path.
+  rm -f "${pkgdir}/opt/${pkgname}/resources/apparmor-profile"
 
   install -dm755 "${pkgdir}/usr/bin"
-  ln -s "/usr/lib/${_pkgname}/${_pkgname}" "${pkgdir}/usr/bin/${_pkgname}"
+  ln -s "/opt/${pkgname}/${_pkgname}" "${pkgdir}/usr/bin/${_pkgname}"
 
   install -Dm644 "${srcdir}/payload/usr/share/applications/${_pkgname}.desktop" \
     "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
@@ -79,12 +79,12 @@ package() {
     "${pkgdir}/usr/share/metainfo/com.t3tools.${_pkgname}.metainfo.xml"
 
   # Debian postinst sets this; pacman runs no maintainer scripts.
-  chmod 4755 "${pkgdir}/usr/lib/${_pkgname}/chrome-sandbox"
+  chmod 4755 "${pkgdir}/opt/${pkgname}/chrome-sandbox"
 
   install -Dm644 "${srcdir}/payload/usr/share/doc/${_pkgname}/copyright" \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
-  install -Dm644 "${pkgdir}/usr/lib/${_pkgname}/LICENSE.electron.txt" \
+  install -Dm644 "${pkgdir}/opt/${pkgname}/LICENSE.electron.txt" \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.electron.txt"
-  install -Dm644 "${pkgdir}/usr/lib/${_pkgname}/LICENSES.chromium.html" \
+  install -Dm644 "${pkgdir}/opt/${pkgname}/LICENSES.chromium.html" \
     "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.chromium.html"
 }
