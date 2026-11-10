@@ -1,0 +1,6 @@
+# Tracks the application version only. The dictionary archive selected by
+# _dataver is attached to the same GitHub release and must be updated by hand.
+[wowtype]
+source = "git"
+git = "https://github.com/Gloridust/WowType.git"
+prefix = "v"

@@ -1,0 +1,20 @@
+post_install() {
+  cat <<'EOF'
+==> WowType 已安装。
+
+  把 WowType 加进 fcitx5 的输入法列表（二选一）：
+    图形界面： fcitx5-configtool →「添加」→「WowType 拼音」
+    命令行：   wowtype-config --add-to-group
+  然后按 Ctrl+空格 切到 WowType，输入 nihao 试一句。
+
+  X11 和 Qt 程序通常还需要：
+    GTK_IM_MODULE=fcitx  QT_IM_MODULE=fcitx  XMODIFIERS=@im=fcitx
+EOF
+}
+
+pre_remove() {
+  cat <<'EOF'
+==> 卸载 WowType 前，先在 fcitx5 的输入法列表里删掉 WowType，
+    否则 fcitx5 下次启动会提示插件缺失。
+EOF
+}
