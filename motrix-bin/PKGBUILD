@@ -3,7 +3,7 @@
 # Contributor: Jack Chen <redchenjs@live.com>
 
 pkgname=motrix-bin
-pkgver=2.4.0
+pkgver=2.4.1
 pkgrel=1
 
 pkgdesc="A full-featured download manager (binary version)"
@@ -19,13 +19,13 @@ changelog="changelog.md"
 
 source=("https://github.com/agalwood/Motrix/releases/download/v${pkgver}/Motrix_${pkgver}_amd64.deb"
         "LICENSE::https://raw.githubusercontent.com/agalwood/Motrix/v${pkgver}/LICENSE")
-sha512sums=('2e89af22c5c574692bb237046f0c7411c6a33b2b9fad23b266c539cfbb88381bc328b30482727c5348e2a51af1ec12b639a3913e1d517703508b5113be3e5558'
+sha512sums=('16d3527e3a132250b25b057c513d56958b50edbb633be9b798b3fa674f08b42c93639bbbe1437321ec4e9ba53e23fc49812235feeb95a711a832c280c7113d5f'
             '0c5155a42c4a624fe45199e604056a72843ce13550b998cabfdd492557e4bdb4f3736a0772b53017e670b6373c4fb423065d98f58d9d379be626b9024386c95b')
 
 package() {
 	tar -xf "$srcdir/data.tar.xz" -C "$pkgdir/"
 
-	# Upstream ships several files world-writable.
+	# Normalize vendor modes so nothing installed is world-writable.
 	find "$pkgdir" -type f -perm -0002 -exec chmod o-w {} +
 	find "$pkgdir" -type d -perm -0002 -exec chmod o-w {} +
 

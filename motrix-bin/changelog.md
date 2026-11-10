@@ -1,18 +1,16 @@
-# Name: v2.4.0 
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.0
-### published at '2026-11-08T13:17:21Z' by github-actions[bot]
+# Name: v2.4.1 
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.1
+### published at '2026-11-09T17:07:13Z' by github-actions[bot]
 ---
-# Motrix 2.4.0
+# Motrix 2.4.1
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.0.zh-CN.md)
+English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.1.zh-CN.md)
 
-## Changes since 2.3.0
+## Changes since 2.4.0
 
-- Choose **File → Create Torrent File** to create a BitTorrent v1 `.torrent` from a file or folder. Desktop users can select local files. In the Server Web UI, select a source within your account’s readable download roots and save the torrent to your browser. Enable seeding after saving to verify and seed the original files.
-- Install the experimental native Synology SPK through Package Center on supported x86_64 and ARM64 models running DSM 7.2.2-72806 or later. Local administrators share the same tasks and settings. See the [Synology installation guide](https://github.com/agalwood/Motrix/blob/v2.4.0/packaging/synology/README.md) for model coverage.
-- Fix Windows downloads failing to remove a temporary filename suffix when file timestamps change during finalization. A verified retry can recover a quarantined file while preserving conflicting files.
-- Separate release workflows verify and publish fnOS FPKs and Synology SPKs. Download the package for your NAS architecture from the Release and check the accompanying SHA-256.
-- Update the desktop Electron runtime to **45.2.3**.
+- Bundle **aria2 1.37.0-motrix.24**. On Windows, the engine tries the remaining resolved addresses for a host after a connection fails. It reports a network error if all candidates fail. Existing DNS and IPv6 defaults are preserved.
+- Upgrade to **i18next 27.0.1** and **react-i18next 18.0.1**. The desktop app, Web UI and Server CLI continue to fall back to `en-US` for missing translations.
+- Refresh the form validation, IP database, proxy and WebSocket dependencies, along with the Vite build tools and the jsdom test environment.
 
 ## Upgrade compatibility
 
@@ -23,7 +21,7 @@ before restoring a verified backup to a separate path for a downgrade. Do not
 reset or delete the upgraded database as a substitute for recovery.
 
 Users migrating from Motrix v1 should follow the
-[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.0/docs/legacy-migration.md)
+[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.1/docs/legacy-migration.md)
 and retain the original profile and engine database backups.
 
 ## Downloads and updates
@@ -33,26 +31,22 @@ native x64 and ARM64 builds. No 32-bit desktop packages are provided. Official
 macOS packages require signing and notarization. Windows NSIS installers and ZIP
 archives are unsigned and may trigger SmartScreen; use official Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.0.
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.1.
 Flatpak bundles and Native Host companions remain separate downloads. Snap
 availability requires verified Store publication to edge and promotion of the
 same amd64/arm64 revisions through candidate to stable.
 
-Server images use `docker.io/motrixapp/motrix-server:2.4.0` and
-`ghcr.io/agalwood/motrix-server:2.4.0`. After public multi-platform runtime
+Server images use `docker.io/motrixapp/motrix-server:2.4.1` and
+`ghcr.io/agalwood/motrix-server:2.4.1`. After public multi-platform runtime
 verification, `2.4`, `2`, `stable`, and `latest` advance to the same verified digest.
-See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.0/docs/docker-server.md).
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.1/docs/docker-server.md).
 
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.3.0...v2.4.0)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.4.0...v2.4.1)
 
 
 ## What's Changed
-* ci(fnos): publish verified native packages for stable releases by @agalwood in https://github.com/agalwood/Motrix/pull/2507
-* fix(finalize): stabilize Windows suffix renames and recover quarantines by @agalwood in https://github.com/agalwood/Motrix/pull/2512
-* docs: revise preflight checklist items in issue template [skip ci] by @3gf8jv4dv in https://github.com/agalwood/Motrix/pull/2510
-* feat(synology): add native DSM 7 packages for x86_64 and ARM64 by @agalwood in https://github.com/agalwood/Motrix/pull/2513
-* feat(torrent): create torrent files from local files and folders by @a0666660 in https://github.com/agalwood/Motrix/pull/2306
-* chore(release): update dependencies and prepare 2.4.0 by @agalwood in https://github.com/agalwood/Motrix/pull/2514
+* fix(engine): bundle aria2 with windows connect failover by @agalwood in https://github.com/agalwood/Motrix/pull/2515
+* chore(release): upgrade translation dependencies and prepare 2.4.1 by @agalwood in https://github.com/agalwood/Motrix/pull/2516
 
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.3.0...v2.4.0
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.4.0...v2.4.1
