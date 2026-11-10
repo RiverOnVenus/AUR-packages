@@ -1,0 +1,94 @@
+# Maintainer: RiverOnVenus <aur@zhui.dev>
+pkgname=t3code-bin
+pkgver=0.1.7
+pkgrel=1
+pkgdesc='Desktop control surface for local coding agents'
+arch=('x86_64')
+url='https://t3.codes'
+license=('MIT')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'dbus'
+  'expat'
+  'gdk-pixbuf2'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libdrm'
+  'libgcc'
+  'libnotify'
+  'libsecret'
+  'libstdc++'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'libxss'
+  'libxtst'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'util-linux-libs'
+  'xdg-utils'
+)
+optdepends=('libappindicator-gtk3: system tray indicator support')
+provides=("t3code=$pkgver")
+conflicts=('t3code')
+# The payload is a prebuilt Electron runtime; upstream ships it stripped.
+options=('!strip' '!debug')
+
+_pkgname=t3code
+_deb="T3-Code-${pkgver}-amd64.deb"
+source=("${_deb}::https://github.com/pingdotgg/t3code/releases/download/v${pkgver}/${_deb}")
+sha256sums=('e1373f8047ba582f2e40aff4b34b57d9a355513d4fb47c34d49d11b5c870f9fe')
+
+prepare() {
+  bsdtar -xf "${srcdir}/${_deb}" -C "${srcdir}" 'data.tar.*'
+  local data=("${srcdir}"/data.tar.*)
+  install -dm755 "${srcdir}/payload"
+  bsdtar --no-same-owner -xf "${data[0]}" -C "${srcdir}/payload"
+}
+
+package() {
+  # Upstream installs to "/opt/T3 Code (Beta)"; spaces and parentheses there
+  # break shell tooling, and nothing inside app.asar references that path.
+  install -dm755 "${pkgdir}/usr/lib"
+  cp -a --no-preserve=ownership "${srcdir}/payload/opt/T3 Code (Beta)" \
+    "${pkgdir}/usr/lib/${_pkgname}"
+
+  # Debian-only AppArmor profile, and it points at the old /opt path.
+  rm -f "${pkgdir}/usr/lib/${_pkgname}/resources/apparmor-profile"
+
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -s "/usr/lib/${_pkgname}/${_pkgname}" "${pkgdir}/usr/bin/${_pkgname}"
+
+  install -Dm644 "${srcdir}/payload/usr/share/applications/${_pkgname}.desktop" \
+    "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+  sed -i "s|^Exec=.*|Exec=/usr/bin/${_pkgname} %U|" \
+    "${pkgdir}/usr/share/applications/${_pkgname}.desktop"
+
+  cp -a "${srcdir}/payload/usr/share/icons" "${pkgdir}/usr/share/"
+  install -Dm644 "${srcdir}/payload/usr/share/metainfo/com.t3tools.${_pkgname}.metainfo.xml" \
+    "${pkgdir}/usr/share/metainfo/com.t3tools.${_pkgname}.metainfo.xml"
+
+  # The Debian postinst sets the setuid bit; pacman runs no maintainer scripts.
+  # electron44 in extra carries the same mode.
+  chmod 4755 "${pkgdir}/usr/lib/${_pkgname}/chrome-sandbox"
+
+  install -Dm644 "${srcdir}/payload/usr/share/doc/${_pkgname}/copyright" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+  install -Dm644 "${pkgdir}/usr/lib/${_pkgname}/LICENSE.electron.txt" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.electron.txt"
+  install -Dm644 "${pkgdir}/usr/lib/${_pkgname}/LICENSES.chromium.html" \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSES.chromium.html"
+}

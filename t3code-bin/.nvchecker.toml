@@ -1,0 +1,6 @@
+[t3code-bin]
+# Nightly builds share the tag namespace and are marked prereleases;
+# /releases/latest resolves to the newest stable release.
+source = "regex"
+url = "https://github.com/pingdotgg/t3code/releases/latest"
+regex = "releases/tag/v([0-9]+\\.[0-9]+\\.[0-9]+)"
