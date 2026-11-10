@@ -1,0 +1,7 @@
+[claude-cage-bin]
+source = "regex"
+url = "https://github.com/Lee-xeo/Claude-Cage/releases.atom"
+regex = 'Cage v([0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.]+)?)'
+# pkgver cannot contain the hyphen upstream puts in prerelease tags.
+from_pattern = "-"
+to_pattern = ""

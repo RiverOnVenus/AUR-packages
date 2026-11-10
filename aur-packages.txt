@@ -3,6 +3,7 @@
 # One pkgname per line, matching the directory name. Comments and blank lines are ignored.
 
 agentsight
+claude-cage-bin
 colout-git
 cppman-git
 delance-langserver
