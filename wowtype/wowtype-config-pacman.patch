@@ -1,6 +1,8 @@
+diff --git a/settings/wowtype-config b/settings/wowtype-config
+index a702071..8708278 100755
 --- a/settings/wowtype-config
 +++ b/settings/wowtype-config
-@@ -665,7 +665,7 @@
+@@ -925,7 +925,7 @@ def collect_diagnostics():
      add("")
      add("## 版本")
      add(f"设置界面：{current_version()}")
@@ -9,7 +11,7 @@
      if dpkg_version(DATA_PKG):  # 0.3.3 及以前词库是单独的包
          add(f"{DATA_PKG}：{dpkg_version(DATA_PKG)}")
      try:
-@@ -799,6 +799,22 @@
+@@ -1061,6 +1061,22 @@ def dpkg_version(package):
      return version if out.returncode == 0 and status.endswith(" installed") else None
  
  
@@ -32,19 +34,19 @@
  def distro_tag():
      """和发布包文件名里的一样：ubuntu26.04、debian13。"""
      info = {}
-@@ -908,7 +924,10 @@
+@@ -1169,8 +1185,10 @@ def is_newer(release):
+ 
  def plan_update(release):
      """要下载的包：[(文件名, 地址)]，和一段说明。装不了时列表为空，说明里写原因。"""
 +    if pacman_version(ENGINE_PKG):
-+        return [], ("WowType 是用 pacman（AUR）装的，"
-+                    "请用你的 AUR 助手更新，例如 yay -Syu wowtype")
++        return [], "WowType 是用 pacman 装的，请用 pacman -Syu wowtype 或你的 AUR 助手更新"
      if dpkg_version(ENGINE_PKG) is None:
 -        return [], "当前不是用 deb 包安装的（比如从源码装的），请到下载页手动更新"
 +        return [], "当前不是用系统包管理器安装的（比如从源码装的），请到下载页手动更新"
      distro = distro_tag()
      name = f"wowtype_{release['version']}_{distro}_{deb_arch()}.deb"
      if name not in release["assets"]:
-@@ -1438,10 +1457,12 @@
+@@ -2399,10 +2417,12 @@ class SettingsWindow(Adw.ApplicationWindow):
      def build_update(self):
          page = Adw.PreferencesPage()
          group = Adw.PreferencesGroup(title="版本")

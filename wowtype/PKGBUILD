@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=wowtype
-pkgver=0.3.6
+pkgver=0.3.10
 pkgrel=1
 _dataver=2026.10.31.2
 _datafile="wowtype-data-rime-ice-$_dataver.tar.gz"
@@ -36,8 +36,8 @@ source=(
 noextract=("$_datafile")
 sha256sums=(
   'SKIP'
-  '7d8d271a88912c10def91caccc99a756a6dc8494d8e578f0e1fd2c574ed0f94c'
-  '29df09b0e3a67ef2131393cf8203ae28b272ba8ac4ea1ecd2cc2d57f0f0d7616'
+  'e3c031eae278d49b5bfa83dc8c3509a1f367c04f8d11e5f24625483249a3b534'
+  '3c132f27e58fe557046af38f0b212ef334668c91c151690bb21c86e91956a980'
   '28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5'
   'e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96'
 )
@@ -78,7 +78,7 @@ check() {
   cd "$srcdir/$pkgname"
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR="$srcdir/$pkgname/target"
-  cargo test --frozen -p wowtype-core --lib
+  cargo test --frozen --release -p wowtype-core --lib
 }
 
 package() {
