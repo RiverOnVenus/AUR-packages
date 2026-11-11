@@ -5,9 +5,10 @@
 _pkgname=losslesscut
 pkgname=losslesscut-bin
 pkgver=3.70.2
-pkgrel=3
+pkgrel=4
 pkgdesc="Crossplatform GUI tool for lossless trimming/cutting of video/audio files"
 arch=('x86_64')
+options=('!debug')
 url="https://github.com/mifi/lossless-cut"
 license=('GPL-2.0-only')
 conflicts=("${_pkgname}")

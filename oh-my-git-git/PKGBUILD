@@ -5,6 +5,7 @@ pkgver=0.6.5.r23.gc64e8f2
 pkgrel=1
 pkgdesc='An interactive Git learning game!'
 arch=(x86_64)
+options=('!debug')
 url='https://ohmygit.org/'
 license=(custom)
 depends=(libglvnd libxcursor libxi libxinerama libxrandr libxrender)

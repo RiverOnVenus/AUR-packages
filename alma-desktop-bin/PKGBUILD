@@ -2,10 +2,11 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=alma-desktop-bin
-pkgver=0.4.567
+pkgver=0.4.571
 pkgrel=1
 pkgdesc='AI provider orchestration desktop app'
 arch=('x86_64')
+options=('!debug')
 url='https://alma.now'
 license=('LicenseRef-custom')
 depends=(
@@ -26,7 +27,7 @@ optdepends=(
 provides=('alma-desktop')
 conflicts=('alma-appimage')
 source=("https://github.com/yetone/alma-releases/releases/download/v${pkgver}/alma-${pkgver}-linux-amd64.deb")
-sha256sums=('b839211c2ab62e26f47df11b5ab37898a9d72077dde09b61838f12366104e909')
+sha256sums=('c4a50ac6132e23c7ece02b1dab21220a2353cd3e154cdd1230c96bbae9ddef07')
 
 prepare() {
   # The payload member was data.tar.xz before 0.4.5xx; upstream now ships data.tar.gz.

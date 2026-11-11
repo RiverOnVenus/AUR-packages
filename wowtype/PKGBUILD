@@ -3,7 +3,7 @@
 
 pkgname=wowtype
 pkgver=0.3.10
-pkgrel=1
+pkgrel=2
 _dataver=2026.10.31.2
 _datafile="wowtype-data-rime-ice-$_dataver.tar.gz"
 pkgdesc='WeType-style pinyin input method for fcitx5, with a Rust engine'
@@ -23,7 +23,7 @@ optdepends=(
   'gnome-shell: GNOME theme and voice overlay extension'
 )
 # Mixed Rust/C++ linking: do not pass GCC LTO objects to the Rust toolchain.
-options=('!lto')
+options=('!lto' '!debug')
 install="$pkgname.install"
 source=(
   "$pkgname::git+$url.git#tag=v$pkgver"

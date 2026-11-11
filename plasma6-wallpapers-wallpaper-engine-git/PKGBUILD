@@ -8,6 +8,7 @@ pkgver=0.5.4.r118.gf1b86e1
 pkgrel=1
 pkgdesc="A simple kde wallpaper plugin integrating wallpaper engine"
 arch=('x86_64')
+options=('!debug')
 url="https://github.com/catsout/wallpaper-engine-kde-plugin"
 license=('GPL-2.0-only')
 depends=("gcc-libs" "glibc" "kcmutils" "kirigami" "libglvnd" "libplasma"

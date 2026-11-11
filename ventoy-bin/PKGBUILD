@@ -4,9 +4,10 @@
 
 pkgname=ventoy-bin
 pkgver=1.1.18
-pkgrel=3
+pkgrel=4
 pkgdesc="A new bootable USB solution"
 arch=('x86_64')
+options=('!debug')
 url="http://www.ventoy.net"
 license=('GPL-3.0-or-later')
 depends=(

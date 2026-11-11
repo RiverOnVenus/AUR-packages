@@ -3,9 +3,10 @@
 
 pkgname=herdr-core-bin
 pkgver=0.1.19
-pkgrel=2
+pkgrel=3
 pkgdesc='Background server that keeps Herdr terminals and coding agents running'
 arch=('x86_64')
+options=('!debug')
 url='https://herdr.dev/core/'
 license=('Apache-2.0')
 depends=()

@@ -4,10 +4,11 @@
 
 pkgname=motrix-bin
 pkgver=2.4.1
-pkgrel=1
+pkgrel=2
 
 pkgdesc="A full-featured download manager (binary version)"
 arch=('x86_64')
+options=('!debug')
 url="https://github.com/agalwood/Motrix"
 license=('MIT')
 
