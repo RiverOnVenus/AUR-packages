@@ -4,8 +4,9 @@ name: "Check upstream versions"
 # keeps a single issue with the results. It never edits packages.
 on:
   schedule:
-    # 00:00 UTC is 08:00 in UTC+8, so a run lands in the morning.
-    - cron: "0 0 * * *"
+    # 00:23 UTC is 08:23 in UTC+8, so a run lands in the morning.
+    # Off the top of the hour, where GitHub delays scheduled runs the most.
+    - cron: "23 0 * * *"
   workflow_dispatch:
 
 permissions:
@@ -24,7 +25,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GH_REPO: ${{ github.repository }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install tools
         run: pacman -Syu --noconfirm --needed nvchecker devtools git github-cli jq

@@ -5,8 +5,9 @@ name: "Refresh devel packages"
 # otherwise leave these packages frozen at their last build.
 on:
   schedule:
-    # 12:00 UTC is 20:00 in UTC+8, so the refresh lands in the evening.
-    - cron: "0 12 * * *"
+    # 12:17 UTC is 20:17 in UTC+8, so the refresh lands in the evening.
+    # Off the top of the hour, where GitHub delays scheduled runs the most.
+    - cron: "17 12 * * *"
   workflow_dispatch:
 
 permissions:
@@ -17,7 +18,7 @@ jobs:
   dispatch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Dispatch builds for pkgver() packages
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -43,10 +44,13 @@ jobs:
           echo "dispatching ${#devel[@]} packages:"
           printf '  %s\n' "${devel[@]}"
 
+          # aur=false: the AUR copy comes from the committed PKGBUILD without
+          # running pkgver(), so a refresh has nothing new to push there.
+          #
           # The Actions API intermittently returns 500; retry instead of
           # failing the refresh.
           for attempt in 1 2 3 4 5; do
-            if gh workflow run push_aur.yml -f packages="${devel[*]}"; then
+            if gh workflow run push_aur.yml -f packages="${devel[*]}" -f aur=false; then
               echo "dispatch accepted on attempt $attempt"
               exit 0
             fi

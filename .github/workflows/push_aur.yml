@@ -9,6 +9,10 @@ on:
         description: "Space-separated package directories to rebuild (empty = all)"
         required: false
         default: ""
+      aur:
+        description: "Push whitelisted packages to the AUR"
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -24,7 +28,7 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Generate matrix
@@ -32,6 +36,8 @@ jobs:
         env:
           EVENT: ${{ github.event_name }}
           REQUESTED: ${{ github.event.inputs.packages }}
+          # Empty on a push, so only an explicit "false" turns AUR pushes off.
+          PUSH_AUR: ${{ github.event.inputs.aur }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           parse_aur() { sed -e 's/^[[:space:]]*//' -e 's/#.*//' -e 's/[[:space:]]*$//' | grep -v '^$'; }
@@ -110,7 +116,7 @@ jobs:
           for p in "${candidates[@]}"; do
             [ -f "$p/PKGBUILD" ] || continue
             build+=("$p")
-            if printf '%s\n' "${aur[@]}" | grep -qxF "$p"; then
+            if [ "$PUSH_AUR" != "false" ] && printf '%s\n' "${aur[@]}" | grep -qxF "$p"; then
               push+=("$p")
             fi
           done
@@ -141,7 +147,7 @@ jobs:
     # packages that are served from the personal repository alone.
     if: github.ref == 'refs/heads/master' && needs.generate-matrix.outputs.aur_count != '0'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install SSH key
         # Pinned to v2 as of 2026-10; bump deliberately.
@@ -202,7 +208,7 @@ jobs:
 
     # Runs upstream build code, so this job must never hold the AUR SSH key.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
 
@@ -239,7 +245,7 @@ jobs:
           done
           ls -l out
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: pkg-${{ matrix.name }}
           path: out/*.pkg.tar.zst
@@ -264,7 +270,7 @@ jobs:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.aur_matrix) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The commit message comes from this package's history.
           fetch-depth: 0
@@ -334,12 +340,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The reconcile step sources every PKGBUILD.
           persist-credentials: false
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         continue-on-error: true
         with:
           pattern: pkg-*
