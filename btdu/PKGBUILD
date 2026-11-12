@@ -6,7 +6,6 @@ pkgver=0.7.2
 pkgrel=3
 pkgdesc='Sampling disk usage profiler for btrfs'
 arch=('x86_64')
-options=('!debug')
 url='https://github.com/CyberShadow/btdu'
 license=('GPL-2.0-only')
 depends=('ncurses')
