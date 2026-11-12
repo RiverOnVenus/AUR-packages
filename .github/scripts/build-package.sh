@@ -5,8 +5,9 @@
 #
 # Sets up the container as root, then runs makepkg and paru as a separate
 # user because they refuse to run as root. That user has passwordless sudo,
-# so the container itself is the isolation boundary. Every package the build
-# produces is copied to <output-dir>, except the automatic debug package.
+# so the container itself is the isolation boundary. Debug packages are turned
+# off. Every package the build produces is copied to <output-dir>, except a
+# debug package that a PKGBUILD turns back on.
 set -euo pipefail
 
 src=$1
@@ -70,6 +71,11 @@ pacman -S --noconfirm paru
 pacman -Rns --noconfirm archlinuxcn-keyring
 sed -i '/^\[archlinuxcn\]$/,$d' /etc/pacman.conf
 pacman -Syy
+
+# The repository publishes no debug packages, so none is built, for AUR
+# dependencies either. The last OPTIONS entry wins, and a PKGBUILD's own
+# options still override it.
+echo "OPTIONS+=('!debug')" > /etc/makepkg.conf.d/no-debug.conf
 echo "::endgroup::"
 
 echo "::group::Prepare build user"
@@ -106,7 +112,8 @@ echo "::endgroup::"
 echo "::group::Collect packages"
 # makepkg has written the pkgver() result back into the PKGBUILD by now, so
 # the list names the files that were actually built.
-# The list also names the debug package, whether or not one was built.
+# When a PKGBUILD turns debug back on, the list also names the debug package,
+# whether or not one was built.
 mapfile -t files < <(as_builder makepkg --packagelist)
 for f in "${files[@]}"; do
   name=$(basename "$f")
