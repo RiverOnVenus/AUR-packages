@@ -1,0 +1,7 @@
+[__config__]
+oldver = "0.112.0"
+
+[lody-desktop-bin]
+source = "regex"
+url = "https://updates.lody.ai/production/latest-linux.yml"
+regex = "version: ([0-9.]+)"
