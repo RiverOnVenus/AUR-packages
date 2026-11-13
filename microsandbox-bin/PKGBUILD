@@ -2,7 +2,7 @@
 
 pkgname=microsandbox-bin
 _pkgname=microsandbox
-pkgver=0.7.14
+pkgver=0.7.15
 pkgrel=1
 pkgdesc='Local microVM runtime for untrusted workloads such as AI agents'
 arch=('x86_64')
@@ -17,7 +17,7 @@ options=('!debug')
 # libkrunfw fork. msb only loads that exact file beside itself, so the system
 # libkrunfw (a different kernel build and version) cannot replace it.
 source=("$_pkgname-$pkgver-x86_64.tar.gz::$url/releases/download/v$pkgver/$_pkgname-linux-x86_64.tar.gz")
-sha256sums=('34d49a7388685f0ea24bfbeecf6864a44718959b57087f1d7481775672db9585')
+sha256sums=('37ffc7bf7b2b977ab004f620f47ae4466f021a9b880c94f46f697c56cf6932b7')
 
 prepare() {
   # Upstream's .cargo/config.toml escapes $ORIGIN for make, so the binary
