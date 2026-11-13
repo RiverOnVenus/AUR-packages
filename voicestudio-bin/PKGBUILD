@@ -1,0 +1,126 @@
+# Maintainer: Palash Debnath <aur at palash dot dev>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=voicestudio-bin
+pkgver=0.5.8
+pkgrel=1
+pkgdesc='Local AI voice studio for cloning, dubbing, dictation and transcription'
+arch=('x86_64')
+url='https://voicestudio.sh/'
+license=('AGPL-3.0-only')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'dbus'
+  'expat'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libgcc'
+  'libgomp'
+  'libnotify'
+  'libsecret'
+  'libstdc++'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'libxss'
+  'libxtst'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'util-linux-libs'
+  'xdg-utils'
+)
+makedepends=('patchelf')
+optdepends=(
+  'ffmpeg: use system FFmpeg and FFprobe instead of downloading them'
+  'libappindicator-gtk3: system tray integration'
+  'xdg-desktop-portal: native file dialogs and global dictation shortcuts'
+  'yt-dlp: use the system yt-dlp for online media imports'
+)
+provides=("voicestudio=$pkgver")
+conflicts=('voicestudio')
+# The app verifies the bundled GGUF runtime against checksums.sha256, so
+# makepkg must not strip those binaries after package() rewrites the manifest.
+options=('!strip' '!debug')
+
+_deb="VoiceStudio-${pkgver}-linux-x64.deb"
+source=("${_deb}::https://github.com/debpalash/VoiceStudio/releases/download/v${pkgver}/${_deb}")
+sha256sums=('097c17b2c6f9ebb628a6a44f4db80855f16bb9426d51906da53729818eda83d5')
+
+prepare() {
+  bsdtar -xf "${srcdir}/${_deb}" -C "${srcdir}" 'data.tar.*'
+  install -dm755 "${srcdir}/payload"
+  bsdtar --no-same-owner -xf "${srcdir}"/data.tar.* -C "${srcdir}/payload"
+}
+
+package() {
+  local appdir="$pkgdir/opt/VoiceStudio"
+
+  install -dm755 "$pkgdir/opt"
+  cp -a --no-preserve=ownership "${srcdir}/payload/opt/VoiceStudio" "$pkgdir/opt/VoiceStudio"
+
+  # Debian-only integration. Arch enables unprivileged user namespaces, so the
+  # bundled sandbox does not need the setuid mode from the Debian postinst.
+  rm -f "$appdir/resources/apparmor-profile"
+  chmod 0755 "$appdir/chrome-sandbox"
+
+  # Upstream leaves a RUNPATH for its CI build directory in the ggml runtime.
+  # Remove it and refresh the manifest the app uses to verify those binaries.
+  find "$appdir/resources/bin" -type f \( -name '*.so*' -o -perm -u+x \) \
+    -exec patchelf --remove-rpath {} +
+  (
+    cd "$appdir/resources/bin"
+    while read -r _ name
+    do
+      digest=$(sha256sum "$name" | cut -d ' ' -f1)
+      printf '%s  %s\n' "$digest" "$name"
+    done < checksums.sha256 > checksums.sha256.new
+    mv checksums.sha256.new checksums.sha256
+  )
+
+  install -dm755 "$pkgdir/usr/bin"
+  cat > "$pkgdir/usr/bin/voicestudio" <<'EOF'
+#!/bin/sh
+export VOICESTUDIO_DISABLE_UPDATER=1
+exec /opt/VoiceStudio/voicestudio "$@"
+EOF
+  chmod 755 "$pkgdir/usr/bin/voicestudio"
+  ln -s voicestudio "$pkgdir/usr/bin/voicestudio-electron"
+
+  install -Dm644 "${srcdir}/payload/usr/share/applications/VoiceStudio.desktop" \
+    "$pkgdir/usr/share/applications/voicestudio.desktop"
+  sed -i \
+    -e 's|^Exec=/opt/VoiceStudio/voicestudio|Exec=/usr/bin/voicestudio|' \
+    -e 's|^Categories=.*|Categories=AudioVideo;Audio;|' \
+    "$pkgdir/usr/share/applications/voicestudio.desktop"
+
+  install -Dm644 "${srcdir}/payload/usr/share/icons/hicolor/512x512/apps/voicestudio.png" \
+    "$pkgdir/usr/share/icons/hicolor/512x512/apps/voicestudio.png"
+
+  install -Dm644 "$appdir/resources/LICENSE" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "$appdir/resources/LICENSE-NOTICE.md" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE-NOTICE.md"
+  install -Dm644 "$appdir/LICENSE.electron.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE.electron.txt"
+  install -Dm644 "$appdir/LICENSES.chromium.html" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSES.chromium.html"
+  install -Dm644 "$appdir/resources/electron/T3CODE-LICENSE.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/T3CODE-LICENSE.txt"
+  install -Dm644 "$appdir/resources/cli/_internal/licenses/Python-LICENSE.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/Python-LICENSE.txt"
+  install -Dm644 "$appdir/resources/cli/_internal/licenses/PyInstaller/COPYING.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/PyInstaller-COPYING.txt"
+}

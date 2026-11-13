@@ -1,0 +1,4 @@
+[voicestudio-bin]
+source = "regex"
+url = "https://github.com/debpalash/VoiceStudio/releases/latest"
+regex = "releases/tag/v([0-9]+\\.[0-9]+\\.[0-9]+)"
