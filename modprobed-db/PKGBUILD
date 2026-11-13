@@ -1,0 +1,27 @@
+# Maintainer: graysky <therealgraysky AT protonmail DOT com>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=modprobed-db
+pkgver=2.52
+pkgrel=1
+pkgdesc='Track every kernel module ever used, useful for make localmodconfig'
+arch=('any')
+url='https://github.com/graysky2/modprobed-db'
+license=('MIT')
+depends=('kmod')
+optdepends=('sudo: needed for recall function')
+replaces=('modprobed_db')
+conflicts=('modprobed_db')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/v${pkgver}.tar.gz")
+sha256sums=('bc721402a728a397e49c30d748e05f3fd63454bee3211110c3cb351d92952fcc')
+install=readme.install
+
+build() {
+  cd "${pkgname}-${pkgver}"
+  make
+}
+
+package() {
+  cd "${pkgname}-${pkgver}"
+  make DESTDIR="$pkgdir" install
+}
