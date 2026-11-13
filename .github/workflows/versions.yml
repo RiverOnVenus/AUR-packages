@@ -21,11 +21,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     container: archlinux:base-devel
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GH_REPO: ${{ github.repository }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The check step sources every PKGBUILD.
+          persist-credentials: false
 
       - name: Install tools
         run: pacman -Syu --noconfirm --needed nvchecker devtools git github-cli jq
@@ -63,6 +63,7 @@ jobs:
             exit 1
           fi
 
+      # No token in this step: pkgctl sources every PKGBUILD.
       - name: Check versions
         id: check
         run: |
@@ -166,6 +167,9 @@ jobs:
           cat /tmp/report.md
 
       - name: Open or update issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           set -o pipefail
           number=$(gh issue list --state open --limit 100 --json number,title |

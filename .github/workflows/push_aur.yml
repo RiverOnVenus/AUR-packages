@@ -311,13 +311,15 @@ jobs:
 
       - name: Clone AUR and update
         if: steps.built.outputs.ok == '1'
+        env:
+          PKG: ${{ matrix.name }}
         run: |
-          message="$(git log -n1 --pretty='%B' "${{ matrix.name }}")"
-          git clone ssh://aur@aur.archlinux.org/${{ matrix.name }}.git ../aur
+          message="$(git log -n1 --pretty='%B' "$PKG")"
+          git clone "ssh://aur@aur.archlinux.org/$PKG.git" ../aur
           shopt -s dotglob
           shopt -s extglob
           rm ../aur/!(.git|.|..) || true
-          cp -r ${{ matrix.name }}/*  ../aur
+          cp -r "$PKG"/* ../aur
           # Version-check metadata stays in the repository, not in the AUR.
           rm -f ../aur/.nvchecker.toml
           cd ../aur
@@ -326,7 +328,7 @@ jobs:
           git add -A
           git diff-index @ --exit-code --quiet || ( git commit -m "Update from GitHub Actions: $message
 
-          https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" && echo "::notice::pushed ${{ matrix.name }} to the AUR" )
+          https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" && echo "::notice::pushed $PKG to the AUR" )
           git push
 
   publish-repo:
