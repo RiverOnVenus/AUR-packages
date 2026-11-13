@@ -1,0 +1,4 @@
+[nali-go]
+source = "git"
+git = "https://github.com/zu1k/nali.git"
+prefix = "v"

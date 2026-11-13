@@ -1,0 +1,42 @@
+# Maintainer: zu1k <i@zu1k.com>
+# Contributor: huyz <>
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=nali-go
+_pkgname=nali
+pkgver=0.8.1
+pkgrel=1
+pkgdesc='Offline tool for querying IP geographic information and CDN provider'
+arch=('x86_64')
+url='https://github.com/zu1k/nali'
+license=('MIT')
+depends=()
+makedepends=('go')
+provides=('nali')
+conflicts=('nali')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('8918e4c1c720dad1590a42fa04c5fea1ec862148127206e716daa16c1ce3561c')
+
+prepare() {
+  cd "${_pkgname}-${pkgver}"
+  export GOPATH="$srcdir"
+  go mod download -modcacherw
+}
+
+build() {
+  cd "${_pkgname}-${pkgver}"
+  export CGO_CPPFLAGS="$CPPFLAGS"
+  export CGO_CFLAGS="$CFLAGS"
+  export CGO_CXXFLAGS="$CXXFLAGS"
+  export CGO_LDFLAGS="$LDFLAGS"
+  export GOPATH="$srcdir"
+  export GOFLAGS='-buildmode=pie -trimpath -mod=readonly -modcacherw'
+  go build \
+    -ldflags "-linkmode external -X \"github.com/zu1k/nali/internal/constant.Version=$pkgver\" -extldflags \"$LDFLAGS\"" \
+    -o "$_pkgname" .
+}
+
+package() {
+  cd "${_pkgname}-${pkgver}"
+  install -Dm755 "$_pkgname" "$pkgdir/usr/bin/$_pkgname"
+}
