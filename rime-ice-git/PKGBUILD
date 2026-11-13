@@ -1,25 +1,25 @@
 # Maintainer: everyx <lunt.luo#gmail.com>
-# Contributor: Julien Virey <julien.virey@gmail.com>
+# Contributor: DeepChirp <deepchirp@archlinuxcn.org>
+# Contributor: RiverOnVenus <aur@zhui.dev>
 #
 # 单包版本：只出 rime-ice-git 一个包，只装全拼方案（rime_ice）及其依赖。
-# 构建逻辑取自 AUR 上 everyx 的 split PKGBUILD，合并了各方案共用的部分。
+# 方案筛选和单包结构参考了 AUR 上 everyx 的 split PKGBUILD。
 # default.yaml 与 rime-prelude 的 /usr/share/rime-data/default.yaml 同名，
 # 因此改名成 _default.yaml，安装时作为 rime_ice_suggestion.yaml 提供。
 
 pkgname=rime-ice-git
 _gitname=rime-ice
 pkgver=r1006.927e1cf
-pkgrel=2
+pkgrel=3
 pkgdesc='Rime 配置：雾凇拼音 | 长期维护的简体词库'
 arch=('any')
 url='https://github.com/iDvel/rime-ice'
 license=('GPL-3.0-or-later')
-depends=('lua' 'librime')
-makedepends=('git' 'rime-prelude')
+depends=('lua' 'librime' 'rime-prelude')
+makedepends=('git')
 provides=('rime-ice')
 conflicts=(
   'rime-emoji'
-  'rime-double-pinyin'
   'rime-ice-pinyin'
   'rime-ice-double-pinyin'
   'rime-ice-double-pinyin-abc'
@@ -49,7 +49,8 @@ pkgver() {
 prepare() {
   cd "$_gitname"
 
-  # 不安装上游的 default.yaml，改名后单独处理（重跑构建时 _default.yaml 已存在）
+  # 上游 default.yaml 不按原名安装，改名后作为 rime_ice_suggestion.yaml 提供
+  # （重跑构建时 _default.yaml 已存在）
   if [[ -f default.yaml && ! -L default.yaml ]]; then
     mv default.yaml _default.yaml
   fi
@@ -58,7 +59,8 @@ prepare() {
   # 留在列表里会让部署报找不到方案。行尾带注释，所以不锚定行尾
   sed -i -E 's/^  - schema: (t9|double_pinyin[a-z_]*)/  # - schema: \1/' _default.yaml
 
-  # rime_deployer 需要 default.yaml 及其引用的 prelude 文件
+  # rime_deployer --compile 不读 /usr/share/rime-data，prelude 的
+  # default.yaml 等文件必须链接进工作目录才能被 include
   local _f
   for _f in $(pacman -Qql rime-prelude | grep -v '/$'); do
     ln -sf "$_f" .
