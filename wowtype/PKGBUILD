@@ -2,9 +2,9 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=wowtype
-pkgver=0.3.10
-pkgrel=2
-_dataver=2026.10.31.2
+pkgver=0.3.12
+pkgrel=1
+_dataver=2026.11.11.3
 _datafile="wowtype-data-rime-ice-$_dataver.tar.gz"
 pkgdesc='WeType-style pinyin input method for fcitx5, with a Rust engine'
 arch=('x86_64')
@@ -28,7 +28,6 @@ install="$pkgname.install"
 source=(
   "$pkgname::git+$url.git#tag=v$pkgver"
   "$_datafile::$url/releases/download/v$pkgver/$_datafile"
-  'wowtype-config-pacman.patch'
   'CC-BY-SA-4.0.txt::https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt'
   'Unicode-3.0.txt::https://www.unicode.org/license.txt'
 )
@@ -36,18 +35,13 @@ source=(
 noextract=("$_datafile")
 sha256sums=(
   'SKIP'
-  'e3c031eae278d49b5bfa83dc8c3509a1f367c04f8d11e5f24625483249a3b534'
-  '3c132f27e58fe557046af38f0b212ef334668c91c151690bb21c86e91956a980'
+  'ea07c3e8cf66cbf7d0ebc23ab95cc96384e6f3808fd0cdee1f87905322e51d7c'
   '28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5'
   'e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96'
 )
 
 prepare() {
   cd "$srcdir/$pkgname"
-  # The settings app checks dpkg for its own version and offers .deb self-updates.
-  # Teach it to report the pacman package and point updates at the AUR helper.
-  patch -Np1 -i "$srcdir/wowtype-config-pacman.patch"
-
   mkdir -p "$srcdir/data"
   tar -xzf "$srcdir/$_datafile" -C "$srcdir/data"
 
