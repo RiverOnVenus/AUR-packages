@@ -16,6 +16,7 @@ jj-git
 kawaii-gcc-git
 kawaii-gcc-zh-cn-git
 kernel-hardening-checker-git
+lody-desktop-bin
 matrix-webcam-git
 neco-git
 pacvis-git
