@@ -5,13 +5,14 @@
 
 pkgname=autocorrect-bin
 pkgver=2.16.3
-pkgrel=2
+pkgrel=3
 pkgdesc="A linter and formatter for help you improve copywriting, to correct spaces, punctuations between CJK (Chinese, Japanese, Korean)."
 arch=("x86_64")
 url="https://github.com/huacnlee/autocorrect"
 license=("MIT")
 depends=("glibc" "gcc-libs")
-provides=("autocorrect")
+provides=("autocorrect=$pkgver")
+conflicts=("autocorrect")
 options=('!strip' '!debug')
 
 source=("https://raw.githubusercontent.com/huacnlee/autocorrect/044425faada4055ebf2629c544c3bc7231330826/LICENSE")
