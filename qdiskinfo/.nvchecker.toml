@@ -1,0 +1,3 @@
+[qdiskinfo]
+source = "git"
+git = "https://github.com/edisionnano/QDiskInfo.git"
