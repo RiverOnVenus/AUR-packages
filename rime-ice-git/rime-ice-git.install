@@ -1,0 +1,21 @@
+post_install() {
+    echo '-------------------------------------------------------------------------'
+    echo '启用雾凇方案，请在输入法框架用户目录下的 default.custom.yaml 里写入：'
+    echo ''
+    echo 'patch:'
+    echo '  __include: rime_ice_suggestion:/'
+    echo ''
+    echo '如需自定义配方：修改用户目录下的 <recipe>.custom.yaml，'
+    echo '例如拼音方案的为 rime_ice.custom.yaml。'
+    echo ''
+    echo '常见输入法框架用户目录位置：'
+    echo '* iBus:   $HOME/.config/ibus/rime/'
+    echo '* Fcitx5: $HOME/.local/share/fcitx5/rime/'
+    echo ''
+    echo '更多 patch 说明：https://github.com/rime/home/wiki/Configuration#補靪'
+    echo '-------------------------------------------------------------------------'
+}
+
+post_upgrade() {
+    post_install
+}
