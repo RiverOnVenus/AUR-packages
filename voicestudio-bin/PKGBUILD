@@ -3,11 +3,11 @@
 
 pkgname=voicestudio-bin
 pkgver=0.5.8
-pkgrel=1
+pkgrel=2
 pkgdesc='Local AI voice studio for cloning, dubbing, dictation and transcription'
 arch=('x86_64')
 url='https://voicestudio.sh/'
-license=('AGPL-3.0-only')
+license=('AGPL-3.0-only' 'MIT' 'Python-2.0' 'GPL-2.0-or-later WITH Bootloader-exception')
 depends=(
   'alsa-lib'
   'at-spi2-core'
@@ -41,6 +41,7 @@ depends=(
   'systemd-libs'
   'util-linux-libs'
   'xdg-utils'
+  'zlib'
 )
 makedepends=('patchelf')
 optdepends=(
@@ -56,8 +57,10 @@ conflicts=('voicestudio')
 options=('!strip' '!debug')
 
 _deb="VoiceStudio-${pkgver}-linux-x64.deb"
-source=("${_deb}::https://github.com/debpalash/VoiceStudio/releases/download/v${pkgver}/${_deb}")
-sha256sums=('097c17b2c6f9ebb628a6a44f4db80855f16bb9426d51906da53729818eda83d5')
+source=("${_deb}::https://github.com/debpalash/VoiceStudio/releases/download/v${pkgver}/${_deb}"
+        'voicestudio.sh')
+sha256sums=('097c17b2c6f9ebb628a6a44f4db80855f16bb9426d51906da53729818eda83d5'
+            '258ca072efb1f3ff0717347bcc2898bba64cf2326c7ba62c1a364c08ddf05c67')
 
 prepare() {
   bsdtar -xf "${srcdir}/${_deb}" -C "${srcdir}" 'data.tar.*'
@@ -76,35 +79,29 @@ package() {
   rm -f "$appdir/resources/apparmor-profile"
   chmod 0755 "$appdir/chrome-sandbox"
 
-  # Upstream leaves a RUNPATH for its CI build directory in the ggml runtime.
-  # Remove it and refresh the manifest the app uses to verify those binaries.
+  # Upstream leaves a RUNPATH into its CI build directory under /tmp, which
+  # is world-writable, so a planted libgomp.so.1 there would load first. The
+  # runtime gets its own directory through LD_LIBRARY_PATH instead.
+  # Revisit when upstream stops embedding the RUNPATH.
   find "$appdir/resources/bin" -type f \( -name '*.so*' -o -perm -u+x \) \
     -exec patchelf --remove-rpath {} +
   (
     cd "$appdir/resources/bin"
-    while read -r _ name
+    awk '{print $2}' checksums.sha256 | while read -r name
     do
-      digest=$(sha256sum "$name" | cut -d ' ' -f1)
-      printf '%s  %s\n' "$digest" "$name"
-    done < checksums.sha256 > checksums.sha256.new
+      printf '%s  %s\n' "$(sha256sum "$name" | cut -d ' ' -f1)" "$name"
+    done > checksums.sha256.new
     mv checksums.sha256.new checksums.sha256
   )
 
-  install -dm755 "$pkgdir/usr/bin"
-  cat > "$pkgdir/usr/bin/voicestudio" <<'EOF'
-#!/bin/sh
-export VOICESTUDIO_DISABLE_UPDATER=1
-exec /opt/VoiceStudio/voicestudio "$@"
-EOF
-  chmod 755 "$pkgdir/usr/bin/voicestudio"
-  ln -s voicestudio "$pkgdir/usr/bin/voicestudio-electron"
+  install -Dm755 "${srcdir}/voicestudio.sh" "$pkgdir/usr/bin/voicestudio"
 
   install -Dm644 "${srcdir}/payload/usr/share/applications/VoiceStudio.desktop" \
-    "$pkgdir/usr/share/applications/voicestudio.desktop"
+    "$pkgdir/usr/share/applications/VoiceStudio.desktop"
   sed -i \
     -e 's|^Exec=/opt/VoiceStudio/voicestudio|Exec=/usr/bin/voicestudio|' \
     -e 's|^Categories=.*|Categories=AudioVideo;Audio;|' \
-    "$pkgdir/usr/share/applications/voicestudio.desktop"
+    "$pkgdir/usr/share/applications/VoiceStudio.desktop"
 
   install -Dm644 "${srcdir}/payload/usr/share/icons/hicolor/512x512/apps/voicestudio.png" \
     "$pkgdir/usr/share/icons/hicolor/512x512/apps/voicestudio.png"
