@@ -1,0 +1,3 @@
+[game-devices-udev]
+source = "git"
+git = "https://codeberg.org/fabiscafe/game-devices-udev.git"
