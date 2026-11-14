@@ -1,0 +1,59 @@
+# Contributor: RiverOnVenus <aur@zhui.dev>
+
+pkgname=hongguo-desktop-bin
+pkgver=0.2.170
+pkgrel=1
+# Linux builds ship as linux-v<pkgver>-test.<n>. pkgver cannot carry that
+# suffix, so _testrel follows <n> while pkgrel stays for packaging changes.
+_testrel=1
+pkgdesc='Unofficial Hongguo short drama desktop client (prebuilt Linux build)'
+arch=('x86_64')
+url='https://github.com/aston314/hongguo-tv-releases'
+license=('LicenseRef-proprietary')
+depends=(
+  'gdk-pixbuf2'
+  'glib2'
+  'glibc'
+  'gst-libav'
+  'gst-plugins-bad'
+  'gst-plugins-base'
+  'gst-plugins-good'
+  'gtk3'
+  'libsoup3'
+  'webkit2gtk-4.1'
+)
+optdepends=(
+  'gst-plugins-ugly: additional media formats'
+  'noto-fonts-cjk: Chinese interface fonts'
+)
+provides=('hongguo-desktop')
+conflicts=('hongguo-desktop')
+options=('!debug')
+source=("https://github.com/aston314/hongguo-tv-releases/releases/download/linux-v${pkgver}-test.${_testrel}/hongguo-desktop-${pkgver}-x86_64.AppImage")
+sha256sums=('01498b2daf3a9780180c210e105d15fb5930c6387f86ae46d5e033da791f220e')
+
+prepare() {
+  cd "$srcdir"
+  chmod +x "hongguo-desktop-${pkgver}-x86_64.AppImage"
+  "./hongguo-desktop-${pkgver}-x86_64.AppImage" --appimage-extract >/dev/null
+}
+
+package() {
+  cd "$srcdir/squashfs-root"
+
+  # The app starts hongguo-tv-core beside its own executable.
+  install -Dm755 usr/bin/hongguo-tv "$pkgdir/usr/bin/hongguo-tv"
+  install -Dm755 usr/bin/hongguo-tv-core "$pkgdir/usr/bin/hongguo-tv-core"
+  install -Dm644 hongguo-tv.desktop "$pkgdir/usr/share/applications/hongguo-tv.desktop"
+  # hicolor registers sizes up to 512x512, so the 1024px vendor icon goes
+  # there and icon loaders scale it down.
+  install -Dm644 hongguo-tv.png "$pkgdir/usr/share/icons/hicolor/512x512/apps/hongguo-tv.png"
+
+  # Upstream publishes no license text, so record that fact for the
+  # LicenseRef-proprietary identifier.
+  install -Dm644 /dev/stdin "$pkgdir/usr/share/licenses/$pkgname/README" <<'EOF'
+Upstream provides no license file for this software. The package
+redistributes the Linux build published at
+https://github.com/aston314/hongguo-tv-releases
+EOF
+}

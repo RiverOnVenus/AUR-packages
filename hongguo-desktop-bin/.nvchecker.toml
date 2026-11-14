@@ -1,0 +1,6 @@
+[hongguo-desktop-bin]
+# The README lists the current version of each release channel. Linux only
+# ships as pre-release tags (linux-v<pkgver>-test.<n>), which pkgver drops.
+source = "regex"
+url = "https://raw.githubusercontent.com/aston314/hongguo-tv-releases/main/README.md"
+regex = 'releases/tag/linux-v([0-9.]+)-test'
