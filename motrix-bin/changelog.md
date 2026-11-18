@@ -1,17 +1,21 @@
-# Name: v2.4.2 
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.2
-### published at '2026-11-15T14:18:06Z' by github-actions[bot]
+# Name: v2.4.3 
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.3
+### published at '2026-11-17T03:17:03Z' by github-actions[bot]
 ---
-# Motrix 2.4.2
+# Motrix 2.4.3
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.2.zh-CN.md)
+English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.3.zh-CN.md)
 
-## Changes since 2.4.1
+## Changes since 2.4.2
 
-- Cancel unfinished file finalization recovery in the same database transaction that deletes a task. Retire orphaned recovery records from older versions at startup so deleted tasks are not processed again.
-- Update the desktop runtime to **Electron 45.3.2** and the database dependency to **better-sqlite3 13.2.0**.
-- Update **ws to 8.23.0**, fixing memory exhaustion caused by a malicious peer flooding Ping frames.
-- Refresh translation, form, proxy and icon dependencies, together with build, test and offline packaging tools.
+- Support custom Server access passwords while retaining the existing generated-password and CLI management flow.
+- Keep Server shutdown handlers active while pending writes and other cleanup drain, preventing an atomic file write from interrupting graceful shutdown.
+- Add an option to keep download statistics visible while task details are open.
+- Display download progress with one decimal place, refresh active progress more frequently, and coalesce duplicate pause requests across controls.
+- Adapt fnOS integration to SDK **0.6.0**, including standalone browser directory authorization, cancellation and popup handling, clearer unsupported file-action messages, and live host theme synchronization. Native iframe and mobile hosts retain direct file capabilities.
+- Update **Electron to 45.3.3**, **i18next to 27.1.3**, and **react-i18next to 18.0.2**. These updates include language-code handling fixes and translation resource subscription fixes.
+- Upgrade the plugin call graph to **React Flow 13.0.1**, preserving node selection and dragging, application themes, and the existing view spacing.
+- Refresh Biome and user-event test tooling. Keep **vscode-jsonrpc 9.0.3** unchanged.
 
 ## Upgrade compatibility
 
@@ -22,7 +26,7 @@ before restoring a verified backup to a separate path for a downgrade. Do not
 reset or delete the upgraded database as a substitute for recovery.
 
 Users migrating from Motrix v1 should follow the
-[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.2/docs/legacy-migration.md)
+[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.3/docs/legacy-migration.md)
 and retain the original profile and engine database backups.
 
 ## Downloads and updates
@@ -32,22 +36,25 @@ native x64 and ARM64 builds. No 32-bit desktop packages are provided. Official
 macOS packages require signing and notarization. Windows NSIS installers and ZIP
 archives are unsigned and may trigger SmartScreen; use official Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.2.
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.3.
 Flatpak bundles and Native Host companions remain separate downloads. Snap
 availability requires verified Store publication to edge and promotion of the
 same amd64/arm64 revisions through candidate to stable.
 
-Server images use `docker.io/motrixapp/motrix-server:2.4.2` and
-`ghcr.io/agalwood/motrix-server:2.4.2`. After public multi-platform runtime
+Server images use `docker.io/motrixapp/motrix-server:2.4.3` and
+`ghcr.io/agalwood/motrix-server:2.4.3`. After public multi-platform runtime
 verification, `2.4`, `2`, `stable`, and `latest` advance to the same verified digest.
-See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.2/docs/docker-server.md).
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.3/docs/docker-server.md).
 
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.4.1...v2.4.2)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.4.2...v2.4.3)
 
 
 ## What's Changed
-* fix(session): cancel finalize recovery when tasks are deleted by @agalwood in https://github.com/agalwood/Motrix/pull/2524
-* chore(release): refresh dependencies and prepare 2.4.2 by @agalwood in https://github.com/agalwood/Motrix/pull/2526
+* fix(downloads): refine progress and prevent duplicate pause requests by @agalwood in https://github.com/agalwood/Motrix/pull/2525
+* feat(downloads): keep statistics visible with task details by @agalwood in https://github.com/agalwood/Motrix/pull/2527
+* feat(server): support custom access passwords by @agalwood in https://github.com/agalwood/Motrix/pull/2529
+* fix(fnos): adapt sdk 0.6 authorization and host events by @agalwood in https://github.com/agalwood/Motrix/pull/2530
+* chore(release): prepare 2.4.3 with dependency updates by @agalwood in https://github.com/agalwood/Motrix/pull/2533
 
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.4.1...v2.4.2
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.4.2...v2.4.3
