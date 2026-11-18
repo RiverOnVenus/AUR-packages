@@ -2,9 +2,9 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=wowtype
-pkgver=0.4.0
+pkgver=0.5.1
 pkgrel=1
-_dataver=2026.11.11.5
+_dataver=2026.11.11.7
 _datafile="wowtype-data-rime-ice-$_dataver.tar.gz"
 pkgdesc='WeType-style pinyin input method for fcitx5, with a Rust engine'
 arch=('x86_64')
@@ -34,7 +34,7 @@ source=(
 noextract=("$_datafile")
 sha256sums=(
   'SKIP'
-  'a00c2c01fde827aa03be0e494baf83cdaf3e124011402acf55bb7b5ce19f5000'
+  'b35a4af76573ebb1c7b402c5285d33bbb1ce2b3244770bef9e90826c3fcfc8aa'
   '28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5'
   'e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96'
 )
@@ -85,8 +85,11 @@ package() {
   install -Dm755 target/release/wowtype-show "$pkgdir/usr/bin/wowtype-show"
 
   local data="$srcdir/data"
+  # nnlm.bin is the sentence-level neural model. DATA-MANIFEST records the
+  # version of each data file and feeds the settings diagnostics.
   install -Dm644 -t "$pkgdir/usr/share/wowtype" \
-    "$data/lexicon.tsv" "$data/english.txt" "$data/words.lm" "$data/wubi86.tsv"
+    "$data/lexicon.tsv" "$data/english.txt" "$data/words.lm" "$data/wubi86.tsv" \
+    "$data/nnlm.bin" "$data/DATA-MANIFEST"
   install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
   install -Dm644 "$data/SOURCE.txt" "$pkgdir/usr/share/doc/$pkgname/DATA-SOURCE.txt"
   install -Dm644 -t "$pkgdir/usr/share/doc/$pkgname" \
