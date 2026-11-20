@@ -2,8 +2,8 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=rtk-bin
-pkgver=1.2.0
-pkgrel=2
+pkgver=1.2.1
+pkgrel=1
 pkgdesc='CLI proxy that reduces LLM token consumption by 60-90% on common dev commands'
 arch=('x86_64')
 url='https://github.com/rtk-ai/rtk'
@@ -16,7 +16,7 @@ depends=()
 options=('!debug')
 
 source_x86_64=("${pkgname}-x86_64-${pkgver}.tar.gz::${url}/releases/download/v${pkgver}/rtk-x86_64-unknown-linux-musl.tar.gz")
-sha256sums_x86_64=('70fee7b4a548c43dde94c77e2335550981b0bc2fb013691d8c8109b5bd0eda37')
+sha256sums_x86_64=('75f64525711be935657a6b228d929c24bd9d1ab7d640ea374a8b913e5b5bac05')
 
 package() {
   install -Dm755 rtk "${pkgdir}/usr/bin/rtk"
