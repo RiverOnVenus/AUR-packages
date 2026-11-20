@@ -2,14 +2,13 @@
 
 pkgname=microsandbox-bin
 _pkgname=microsandbox
-pkgver=0.7.15
+pkgver=0.7.16
 pkgrel=1
 pkgdesc='Local microVM runtime for untrusted workloads such as AI agents'
 arch=('x86_64')
 url='https://github.com/superradcompany/microsandbox'
 license=('Apache-2.0' 'GPL-2.0-only' 'LGPL-2.1-only')
 depends=('glibc' 'libgcc')
-makedepends=('patchelf')
 provides=("$_pkgname=$pkgver")
 conflicts=("$_pkgname")
 options=('!debug')
@@ -17,14 +16,7 @@ options=('!debug')
 # libkrunfw fork. msb only loads that exact file beside itself, so the system
 # libkrunfw (a different kernel build and version) cannot replace it.
 source=("$_pkgname-$pkgver-x86_64.tar.gz::$url/releases/download/v$pkgver/$_pkgname-linux-x86_64.tar.gz")
-sha256sums=('37ffc7bf7b2b977ab004f620f47ae4466f021a9b880c94f46f697c56cf6932b7')
-
-prepare() {
-  # Upstream's .cargo/config.toml escapes $ORIGIN for make, so the binary
-  # carries literal "\$$ORIGIN" entries that resolve against the working
-  # directory. msb loads libkrunfw by full path and needs no runpath.
-  patchelf --remove-rpath msb
-}
+sha256sums=('1f09ec7057bfcccb70e1713eb61061f15fa759b45e147759eb0b30aa7f5cb3bd')
 
 check() {
   HOME="$srcdir/home" "$srcdir/msb" --version
