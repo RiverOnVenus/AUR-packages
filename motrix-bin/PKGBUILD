@@ -3,7 +3,7 @@
 # Contributor: Jack Chen <redchenjs@live.com>
 
 pkgname=motrix-bin
-pkgver=2.4.3
+pkgver=2.4.5
 pkgrel=1
 
 pkgdesc="A full-featured download manager (binary version)"
@@ -21,7 +21,7 @@ changelog="changelog.md"
 
 source=("https://github.com/agalwood/Motrix/releases/download/v${pkgver}/Motrix_${pkgver}_amd64.deb"
         "LICENSE::https://raw.githubusercontent.com/agalwood/Motrix/v${pkgver}/LICENSE")
-sha512sums=('31ce6507f835f2a5ccbeddd0d10d9fbe2775d36f8a2af48ed62066481dbb35dfbc3af8abbd94b85fb4abeea1578131882a9b2ca09b6fd2668a54b32b568d53c4'
+sha512sums=('defa7d5f008f10f857018ba8f2660f138e0fb5dd13b54c4a9d18ffe11011458c897d77d1d941111c1bbbe9610be4dedfd6f8bb735066fbd6c0d1f82dc37c3923'
             '0c5155a42c4a624fe45199e604056a72843ce13550b998cabfdd492557e4bdb4f3736a0772b53017e670b6373c4fb423065d98f58d9d379be626b9024386c95b')
 
 package() {
