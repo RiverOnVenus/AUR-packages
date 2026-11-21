@@ -25,6 +25,7 @@ plasma6-applets-kurve-git
 plasma6-wallpapers-smart-video-wallpaper-reborn-git
 python-dbgpu
 qwenimage-ncnn-vulkan-bin
+shisa
 terminaltexteffects-git
 uu-remote-linux
 whichllm

@@ -1,0 +1,4 @@
+[shisa]
+source = "git"
+git = "https://github.com/RiverOnVenus/Shisa.git"
+prefix = "v"
