@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=wowtype
-pkgver=0.7.1
+pkgver=0.7.3
 pkgrel=1
 _dataver=2026.11.11.8
 _datafile="wowtype-data-rime-ice-$_dataver.tar.gz"
