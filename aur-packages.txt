@@ -28,5 +28,6 @@ qwenimage-ncnn-vulkan-bin
 shisa
 terminaltexteffects-git
 uu-remote-linux
+uuyc-bin
 whichllm
 whichllm-git

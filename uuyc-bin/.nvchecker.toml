@@ -1,0 +1,10 @@
+# The client has no versioned download page. The release endpoint redirects to
+# a versioned .deb, so the version comes from that Location header. The Debian
+# revision is dropped because pkgver cannot contain a hyphen.
+[uuyc-bin]
+source = "httpheader"
+url = "https://api.nrd.nie.163.com/api/v1/release/dl/8?channel=gwqd"
+header = "Location"
+method = "HEAD"
+follow_redirects = false
+regex = 'nrd-uuyc_([0-9][0-9.]*)-[0-9]+_amd64\.deb'
