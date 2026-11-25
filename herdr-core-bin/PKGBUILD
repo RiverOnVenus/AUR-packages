@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=herdr-core-bin
-pkgver=0.1.21
+pkgver=0.1.22
 pkgrel=1
 pkgdesc='Background server that keeps Herdr terminals and coding agents running'
 arch=('x86_64')
@@ -16,7 +16,7 @@ conflicts=('herdr-core' 'hc-bin')
 # Literal arch names, not $CARCH: .SRCINFO is generated on one host but must
 # carry the real asset URL.
 source_x86_64=("${pkgname%-bin}-${pkgver}-x86_64.tar.gz::https://releases.herdr.dev/core/${pkgver}/herdr-core-linux-x86_64.tar.gz")
-sha256sums_x86_64=('78424755c10a40dde38a0bdb55c20ac19706e9ae05ed68fc2acf1fcff0d941c1')
+sha256sums_x86_64=('3054ec3992ce80c5715d721caa9dcefa6056721d15dc113f4750afce763ba5df')
 
 package() {
   install -Dm755 "$srcdir/herdr-core" "$pkgdir/usr/bin/herdr-core"
