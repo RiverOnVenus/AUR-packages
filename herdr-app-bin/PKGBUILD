@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=herdr-app-bin
-pkgver=0.1.16
+pkgver=0.1.18
 pkgrel=1
 pkgdesc='Native desktop workspace for terminals and coding agents that keep running'
 arch=('x86_64')
@@ -30,7 +30,7 @@ conflicts=('herdr-app' 'herdr-app-desktop-bin')
 source=("${pkgname%-bin}.desktop")
 source_x86_64=("${pkgname%-bin}-${pkgver}-x86_64.tar.gz::https://releases.herdr.dev/app/${pkgver}/herdr-app-linux-x86_64.tar.gz")
 sha256sums=('2cc1199525a1bac6364a7397363f96a00db3faaf51aea049f9d4a7f694ef885a')
-sha256sums_x86_64=('282d2632196b238206cfe66bfb61c0faf299ca1c91843bd076521bbe36571216')
+sha256sums_x86_64=('8a11edd79dd40b349f7286cf51910b62e21136daf8f03005a9fd2c4dc5830f83')
 
 package() {
   install -Dm755 "$srcdir/herdr-app/herdr-app" "$pkgdir/usr/bin/herdr-app"
