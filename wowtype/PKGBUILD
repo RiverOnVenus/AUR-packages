@@ -2,7 +2,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=wowtype
-pkgver=0.7.8
+pkgver=0.7.13
 pkgrel=1
 _dataver=2026.11.11.8
 _datafile="wowtype-data-rime-ice-$_dataver.tar.gz"
@@ -54,8 +54,9 @@ build() {
   cd "$srcdir/$pkgname"
   export RUSTUP_TOOLCHAIN=stable
   export CARGO_TARGET_DIR="$srcdir/$pkgname/target"
+  # wowtype-sync pairs devices for the cross-device clipboard feature.
   cargo build --frozen --release -p wowtype-core \
-    --lib --bin wowtype-check --bin wowtype-show
+    --lib --bin wowtype-check --bin wowtype-show --bin wowtype-sync
 
   cmake -S fcitx5-addon -B build \
     -DCMAKE_BUILD_TYPE=None \
