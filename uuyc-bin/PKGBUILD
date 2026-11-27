@@ -1,4 +1,5 @@
 # Maintainer: RiverOnVenus <aur@zhui.dev>
+# Contributor: Wensheng Tang <sp3478@gmail.com>
 # Upstream has no Linux download page. This is the endpoint that
 # https://uuyc.163.com/install.sh uses: it redirects to a versioned .deb behind
 # rotating signed parameters, so the URL carries no version and the checksum
@@ -51,7 +52,6 @@ makedepends=('icoutils')
 optdepends=(
   'alsa-lib: ALSA audio backend fallback'
   'apparmor: load the bundled WebView profile when unprivileged user namespaces are restricted'
-  'fuse3: FUSE support for remote file drag-and-drop mounting'
   'ibus: input method support while ibus runs'
   'intel-media-driver: VA-API hardware video acceleration on Intel GPUs (Broadwell+)'
   'libva: VA-API hardware video decoding'
