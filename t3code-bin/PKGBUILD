@@ -1,6 +1,6 @@
 # Maintainer: RiverOnVenus <aur@zhui.dev>
 pkgname=t3code-bin
-pkgver=0.1.12
+pkgver=0.1.13
 pkgrel=1
 pkgdesc='Desktop control surface for local coding agents'
 arch=('x86_64')
@@ -49,7 +49,7 @@ options=('!strip' '!debug')
 _pkgname=t3code
 _deb="T3-Code-${pkgver}-amd64.deb"
 source=("${_deb}::https://github.com/pingdotgg/t3code/releases/download/v${pkgver}/${_deb}")
-sha256sums=('c1ca3e656e12ba10377513e9bbe20a5112540cda9601e21c70b85ba7c53f1b29')
+sha256sums=('630dfe9d041b42622d9e5d5b1138b3f1068136eb12af85ec34d491e33aeaa061')
 
 prepare() {
   bsdtar -xf "${srcdir}/${_deb}" -C "${srcdir}" 'data.tar.*'
