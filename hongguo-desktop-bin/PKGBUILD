@@ -1,7 +1,7 @@
 # Contributor: RiverOnVenus <aur@zhui.dev>
 
 pkgname=hongguo-desktop-bin
-pkgver=0.2.182
+pkgver=0.2.185
 pkgrel=1
 # Linux builds ship as linux-v<pkgver>-test.<n>. pkgver cannot carry that
 # suffix, so _testrel follows <n> while pkgrel stays for packaging changes.
@@ -30,7 +30,7 @@ provides=('hongguo-desktop')
 conflicts=('hongguo-desktop')
 options=('!debug')
 source=("https://github.com/aston314/hongguo-tv-releases/releases/download/linux-v${pkgver}-test.${_testrel}/hongguo-desktop-${pkgver}-x86_64.AppImage")
-sha256sums=('d2296d7f8c0ce7f95ad1ffbdca001f6e2b7375dd68b6cfc37c230dfbe3bea372')
+sha256sums=('a38abb532a5bf26b1298d3b5e866c762cfd41d24ad9451e5cfded4ebdd4e7371')
 
 prepare() {
   cd "$srcdir"
