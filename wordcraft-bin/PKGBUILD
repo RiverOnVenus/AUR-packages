@@ -1,7 +1,7 @@
 # Maintainer: Athulkrishna <athulkrishnasv2015@gmail.com>
 pkgname=wordcraft-bin
 _pkgname=wordcraft
-pkgver=0.18.1
+pkgver=0.19.1
 pkgrel=1
 pkgdesc="Open-source native word processor, Word alternative (prebuilt binary)"
 arch=('x86_64')
@@ -12,7 +12,7 @@ provides=("$_pkgname")
 conflicts=("$_pkgname")
 options=('!strip' '!debug')
 source_x86_64=("$_pkgname-$pkgver-linux-x86_64.tar.gz::$url/releases/download/v${pkgver}/$_pkgname-$pkgver-linux-x86_64.tar.gz")
-sha256sums_x86_64=('312a057d46dd80597c12dccfd1097ce25edea40baaaeb50bcb6f01ac1aebadb5')
+sha256sums_x86_64=('ec8d8cc2b9204ac03d1380cec910defdf2e8850d93e9b87d6184eafef61968b4')
 
 package() {
 	local _root="$srcdir/$_pkgname-$pkgver-linux-$CARCH"
