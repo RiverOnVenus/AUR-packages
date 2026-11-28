@@ -1,15 +1,19 @@
-# Name: v2.4.5 
-### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.5
-### published at '2026-11-20T06:00:20Z' by github-actions[bot]
+# Name: v2.4.8 
+### URL: https://github.com/agalwood/Motrix/releases/tag/v2.4.8
+### published at '2026-11-27T18:57:28Z' by github-actions[bot]
 ---
-# Motrix 2.4.5
+# Motrix 2.4.8
 
-English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.5.zh-CN.md)
+English | [简体中文](https://github.com/agalwood/Motrix/blob/main/docs/release-notes/2.4.8.zh-CN.md)
 
-## Changes since 2.4.4
+## Changes since 2.4.7
 
-- Desktop now accepts recoverable handoffs from paired browser extensions by default. Browser Extension **0.1.25** negotiates this capability for eligible paused downloads. If the connection drops after submission, the extension can recover the existing task ID.
-- Existing extensions and older hosts continue to support the original download submission method. To stop accepting new handoffs on Desktop, launch with `MOTRIX_DOWNLOAD_HANDOFF=0`; previously prepared operations can still finish.
+- **Bundled aria2 1.37.0-motrix.27 (#2421, #2575)**: Clear aria2's in-memory `DNSCache` immediately when `async-dns` changes via `aria2.changeGlobalOption`, and skip non-UP network interfaces (`IfOperStatusUp` / `IFF_UP`) as well as non-routable IPv6 addresses in `checkAddrconfig()` while preserving valid ULA and global unicast IPv6.
+- **Auto DNS fallback on unreachable route errors (#2421, #2572)**: Trigger automatic system DNS fallback in `auto` mode when downloads hit unreachable route failures (Windows `WSAENETUNREACH` / `WSAEHOSTUNREACH` and POSIX `Network is unreachable` / `No route to host`) and surface them as `NetworkError`.
+- **Direct magnet metadata rebind & finalization (#2569, #2571)**: Resolve real torrent names and output paths immediately after `followedBy` metadata transitions on direct magnet downloads, preventing tasks from staying stuck on their `infoHash` title or failing finalization.
+- **Synology DSM 7 directory identity (#2557, #2568)**: Avoid falling back to `ctime` when `birthtimeNs` is unavailable on Synology DSM 7 filesystems, fixing spurious `Task download directory changed` errors during pause or removal.
+- **Symlinked desktop save directories (#2562, #2570)**: Canonicalize symlinked desktop `saveDir` paths before finalization so tasks saving through symbolic links complete cleanly.
+- **Failed media temp directory cleanup (#2532, #2573)**: Clean up `motrix-media-*` temporary directories by default when media downloads fail so aborted runs do not accumulate gigabytes of stale fragments in `%TEMP%` (opt-in debugging retention remains available via `MOTRIX_KEEP_FAILED_MEDIA_TMP=1`).
 
 ## Upgrade compatibility
 
@@ -20,7 +24,7 @@ before restoring a verified backup to a separate path for a downgrade. Do not
 reset or delete the upgraded database as a substitute for recovery.
 
 Users migrating from Motrix v1 should follow the
-[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.5/docs/legacy-migration.md)
+[migration guide](https://github.com/agalwood/Motrix/blob/v2.4.8/docs/legacy-migration.md)
 and retain the original profile and engine database backups.
 
 ## Downloads and updates
@@ -30,21 +34,27 @@ native x64 and ARM64 builds. No 32-bit desktop packages are provided. Official
 macOS packages require signing and notarization. Windows NSIS installers and ZIP
 archives are unsigned and may trigger SmartScreen; use official Release downloads.
 
-Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.5.
+Stable publication updates both `latest*.yml` and `beta*.yml` feeds to 2.4.8.
 Flatpak bundles and Native Host companions remain separate downloads. Snap
 availability requires verified Store publication to edge and promotion of the
 same amd64/arm64 revisions through candidate to stable.
 
-Server images use `docker.io/motrixapp/motrix-server:2.4.5` and
-`ghcr.io/agalwood/motrix-server:2.4.5`. After public multi-platform runtime
+Server images use `docker.io/motrixapp/motrix-server:2.4.8` and
+`ghcr.io/agalwood/motrix-server:2.4.8`. After public multi-platform runtime
 verification, `2.4`, `2`, `stable`, and `latest` advance to the same verified digest.
-See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.5/docs/docker-server.md).
+See the [Docker Server guide](https://github.com/agalwood/Motrix/blob/v2.4.8/docs/docker-server.md).
 
-[Full changelog](https://github.com/agalwood/Motrix/compare/v2.4.4...v2.4.5)
+[Full changelog](https://github.com/agalwood/Motrix/compare/v2.4.7...v2.4.8)
 
 
 ## What's Changed
-* feat(release): enable paired desktop handoff by default in 2.4.5 by @agalwood in https://github.com/agalwood/Motrix/pull/2539
+* fix(synology): avoid birthtimeNs ctime fallback in DSM directory identity by @agalwood in https://github.com/agalwood/Motrix/pull/2568
+* fix(finalize): canonicalize symlinked desktop saveDir before finalization by @agalwood in https://github.com/agalwood/Motrix/pull/2570
+* fix(engine): trigger auto DNS fallback on unreachable route errors by @agalwood in https://github.com/agalwood/Motrix/pull/2572
+* fix(bt): resolve direct magnet name and paths after followedBy rebind by @agalwood in https://github.com/agalwood/Motrix/pull/2571
+* fix(media): clean up failed media temp directories by default by @agalwood in https://github.com/agalwood/Motrix/pull/2573
+* fix(engine): bundle aria2 motrix.27 with DNS cache clear and up-interface filter by @agalwood in https://github.com/agalwood/Motrix/pull/2575
+* chore(release): prepare 2.4.8 by @agalwood in https://github.com/agalwood/Motrix/pull/2576
 
 
-**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.4.4...v2.4.5
+**Full Changelog**: https://github.com/agalwood/Motrix/compare/v2.4.7...v2.4.8
